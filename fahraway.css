@@ -1,0 +1,126 @@
+body{
+	/*background-color:#00CC66; ODER*/
+	background-color:rgb(0,204,102);
+	height:95%;
+	margin: 0 auto;
+}
+html{
+	height:100%;
+	
+}
+
+#rahmen_1 {
+	border: solid 2px black;
+	margin: 8px 15px 4px 15px;
+	height:15%;
+}
+
+.autoCenter{
+	margin:0 auto;
+}
+/*===>Markierungen*/
+.rosa{
+	background-color: #ffc1c1;
+}
+/*============================================================*/
+/*===>Rahmen in dem die ganzen Navigationslinks stehen*/
+#navigation{
+	margin: 8px 15px 4px 15px;
+	background-color:#66ccff; 
+	border: solid 2px black;
+	height:25%;
+	line-height: 1.8;
+}
+/**/
+.naviInline{
+	margin:0px;
+	padding:0px;
+}
+.ankerNavi{
+	font-size: 12px;
+	margin:0px;
+	padding:0px;
+}
+.naviBox{
+	float:left;
+	border-style: solid; 
+	border-width: 2px; 
+	margin: 4px;
+	padding: 4px;
+	background-color: #F0F0F0;
+	width:9%;
+	height: 80%;
+}
+.naviBoxSelect{
+	float:left;
+	border-style: solid; 
+	border-width: 2px; 
+	margin: 4px;
+	padding: 4px;
+	background-color: #8B5A2B;
+	width:9%;
+	height: 80%;
+}
+#navi{
+	height:20%;
+	margin-left:30px;
+}
+/*============================================================*/
+#rahmen_3 {
+	/*float: right;*/
+	margin: 8px 15px 4px 15px;
+	/*width: 73%;*/
+	background-color:#66ccff; 
+	border: solid 2px black;
+	/*margin: 10px;*/
+	/*margin-left: 2px;*/
+	height:52%;
+}
+
+h1{
+	text-align:center;
+}
+#b_text{
+	text-align:justify;
+	font-size: 20px;
+	line-height: 1.5;
+	margin:7px 14px 14px 14px;
+}
+.info_text_1{
+	margin:7px 14px 0px 14px;
+	font-size: 20px;
+}
+.info_text_2{
+	font-size: 20px;
+	margin:0px 14px 14px 14px;
+}
+li{
+	margin-bottom:10px;
+}
+.red_text{
+	color:red;
+}
+td,th{
+	border: solid black 2px;
+	font-size: 18px;
+	padding:3px;
+	background-color:white;
+	
+}
+table{
+	border: solid black 2px;
+	margin-left: auto; 
+	margin-right: auto;
+}
+.bilder{
+	margin-left: 200px;
+	margin-right: 200px;
+}
+img{
+	width:200px;
+	height: 100px;
+	border: 2px solid black;
+	padding:2px;
+}
+
+
