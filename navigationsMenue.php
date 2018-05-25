@@ -1,8 +1,8 @@
 		<div id="navigation"> 
 			<div class="naviBox"> 
-  					<div class="naviInline">Fahrten:												</div> 
-  					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php">Zeige</a>		</div> 
-					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php">Suche</a>	    </div> 
+  					<div class="naviInline">Fahrten:															</div> 
+  					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php?modus=1">Zeige</a>			</div> 
+					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php?modus=2">Suche</a>	    	</div> 
 			</div> 
 			<div class="naviBox"> 
   					<div class="naviInline">Schüler:												</div> 
