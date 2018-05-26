@@ -54,10 +54,18 @@
 			}elseif ($_GET['modus'] == 2){					// Öffne Suchfenster und zeige alle Datensäte
 
 				$suchfenster = 1;	
+				$where = '';
+				
 			}elseif ($_GET['modus'] == 3){					// Öffne Suchfenster und zeige alle Datensäte
 
-				$suchfenster = 1;	
-				$where = '';
+				$suchfenster = 1									;
+				if (is_numeric($_POST["f_id_input"])){
+					$f_id = $_POST["f_id_input"]					;
+				}else{
+					$f_id = $_POST["f_id"]							;
+				}
+				$where = 'WHERE f_id'.$_POST["f_id_operator"] . $f_id;
+				
 				
 			}
 
@@ -129,6 +137,8 @@
 												;
 								");
 			}
+
+
 			if ($suchfenster == 1){
 
 
@@ -142,23 +152,30 @@
 												ON 					(f.f_unterkunft=u.u_id)
 												;
 								");
-					
+	
+
+
 				$index=0;
+
 				while($row=pg_fetch_assoc($formSelect)){
 					$fahrtID[$index] = $row[$attributeFahrt[0]]		;
 					$index++										;
 				}
+
+				$operator[0]=">"	;
+				$operator[1]=">="	;
+				$operator[2]="="	;
+				$operator[3]="<="	;
+				$operator[4]="<"	;
+
 				asort($fahrtID);	
 				echo'	<div id="suche">'																;
 				echo		'<form action="./fahrt.php?modus=3" method="post" autocomplete="off">'		;
 				echo			'<label>FahrtID:'														;
 				echo			'<select name="f_id_operator">'											;
 				echo '				<option>---				</option>'									;
-				echo '				<option> >				</option>'									;
-				echo '				<option> >=				</option>'									;
-				echo '				<option> =				</option>'									;
-				echo '				<option> <=				</option>'									;
-				echo '				<option> <				</option>'									;
+				foreach ($option as $key => $val) {	
+				echo '				<option>'.$val.'</option>'									;
 				echo '			</select>'																;
 				echo			'<select name="f_id">'													;
 				echo '				<option>---</option>'												;
@@ -167,7 +184,7 @@
 				}
 				
 				echo '			</select>'																;
-				echo '			<input id="f_id_input" name="f_id_input">'								;	
+				echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5">'								;	
 				echo			'<select name="f_id_verknuepfung">'										;
 				echo '				<option>---				</option>'									;
 				echo '				<option>AND				</option>'									;
@@ -176,7 +193,8 @@
 				echo '		</label>'																	;
 				echo '		<button type="submit" name="action" value="0">Suche</button>'				;
 				echo '	</form>'																		;
-				echo '</div>'																			;
+				echo '</div>'																			
+
 			}
 
 
@@ -215,6 +233,30 @@
 */
 
 			echo'	<div id="rahmen_3">';
+
+
+					echo "<table>"													;
+							
+							foreach ($_POST as $key => $value)	{
+									echo "<tr>"										;
+									echo "<td>".$key."</dt><td>".$value."</dt>"		;	
+									echo "</tr>"									;
+							}
+					echo "</table>";
+					echo "<table>"													;
+							
+							foreach ($_GET as $key => $value)	{
+									echo "<tr>"										;
+									echo "<td>".$key."</dt><td>".$value."</dt>"		;	
+									echo "</tr>"									;
+							}
+									echo "<tr>"										;
+									echo "<td>Suchfenster</dt><td>".$suchfenster."</dt>"		;	
+									echo "<td>WHERE</dt><td>".$where."</dt>"		;	
+									echo "</tr>"									;
+					echo "</table>";
+
+
 					echo "<table>";
 							echo "<tr>";
 								foreach ($spaltenBezeichnerFahrt as $key => $value)	{
