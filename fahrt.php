@@ -168,37 +168,74 @@
 				$operator[3]="<="	;
 				$operator[4]="<"	;
 
+
+				$verknuepfung[0] ="AND";
+				$verknuepfung[1] ="OR";
+
 				asort($fahrtID);	
 				echo'	<div id="suche">'																;
 				echo		'<form action="./fahrt.php?modus=3" method="post" autocomplete="off">'		;
 				echo			'<label>FahrtID:'														;
 				echo			'<select name="f_id_operator">'											;
 				echo '				<option>---				</option>'									;
-				foreach ($option as $key => $val) {	
-				echo '				<option>'.$val.'</option>'									;
-				echo '			</select>'																;
+				foreach ($operator as $key => $val) {	
+					if (array_key_exists('f_id_operator',$_POST) && $_POST['f_id_operator']== $val){
+						echo '				<option selected >'.$val.'</option>'											;
+					}else{
+						echo '				<option >'.$val.'</option>'											;
+					}
+				}
+				echo '			</select>'		;;	
+//-------------------------------------------------------------------------------------------------------------------------------------
 				echo			'<select name="f_id">'													;
 				echo '				<option>---</option>'												;
+
 				foreach ($fahrtID as $key => $val) {	
-					echo '			<option>'.$val.'</option>'											;
+					if (array_key_exists('f_id',$_POST) && $_POST['f_id']== $val){
+						echo '				<option selected >'.$val.'</option>'											;
+					}else{
+						echo '				<option>'.$val.'</option>'											;
+					}
 				}
 				
 				echo '			</select>'																;
-				echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5">'								;	
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+				if (array_key_exists('f_id_input',$_POST) && $_POST['f_id_input'] != ''){
+					echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5" value='.$_POST['f_id_input'].'>'		;	
+				}else{
+					echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5" >'		;	
+				}
+	
+//-------------------------------------------------------------------------------------------------------------------------------------
 				echo			'<select name="f_id_verknuepfung">'										;
 				echo '				<option>---				</option>'									;
-				echo '				<option>AND				</option>'									;
-				echo '				<option>OR				</option>'									;
+				foreach ($verknuepfung as $key => $val) {	
+					if (array_key_exists('f_id_verknuepfung',$_POST) && $_POST['f_id_verknuepfung']== $val){
+						echo '				<option selected >'.$val.'</option>'											;
+					}else{
+						echo '				<option>'.$val.'</option>'											;
+					}
+				}
+
 				echo '			</select>'																;
 				echo '		</label>'																	;
 				echo '		<button type="submit" name="action" value="0">Suche</button>'				;
 				echo '	</form>'																		;
-				echo '</div>'																			
-
+				echo '</div>'																			;		
 			}
 
+//-------------------------------------------------------------------------------------------------------------------------------------
+/*
+				echo '			<input type="button" id="btnReset" value="Reset" onclick="Reset();" />'	;
+				echo '				<script type="text/javascript">'											;
+				echo '    				function Reset() {'													;
+        		echo '						var dropDown = document.getElementById("ddlFruits");'						;
+        		echo '						dropDown.selectedIndex = 0;'												;
+    			echo '					}'																		;
+				echo '				</script>"'																;
 
-
+				*/
 /*
 
 
