@@ -1,0 +1,42 @@
+/*
+				echo '			<input type="button" id="btnReset" value="Reset" onclick="Reset();" />'	;
+				echo '				<script type="text/javascript">'											;
+				echo '    				function Reset() {'													;
+        		echo '						var dropDown = document.getElementById("ddlFruits");'						;
+        		echo '						dropDown.selectedIndex = 0;'												;
+    			echo '					}'																		;
+				echo '				</script>"'																;
+
+				*/
+/*
+
+
+					echo "<table>";
+							echo "<tr>";
+								foreach ($spaltenBezeichnerFahrt as $key => $value)	{
+									if(array_key_exists('select',$_GET) && $_GET['select']==1){
+										echo "<th>". $value ."</th>";
+									}else{
+										echo "<th>". '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";
+									}
+								}
+							echo "</tr>";
+
+						while($row=pg_fetch_assoc($result)){
+							echo "<tr>";
+								foreach ($attributeFahrt as $value)	{
+									if($value == 'f_id') {
+										$fahrtID = $row[ $value ]; 
+									}
+									if ($row[ $value ] == ''){
+										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">FÜGE HINZU</a></td>';
+									}else{
+										echo "<td>" .$row[ $value] . "</td>";
+									}
+								}
+							echo "</tr>";
+						}
+			echo "</table>";
+				
+			}
+*/

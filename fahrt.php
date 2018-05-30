@@ -8,6 +8,8 @@
 	<body>
 		<?php
 			require("./navigationsMenue.php");			/*Der ausgelagerte Navigationsblock wird eingefügt*/
+
+			// 01---> Array mit den Attributen der Relation "Fahrt"
 			$attributeFahrt = [							
     			0	=> "f_id",
     			1	=> "f_name",
@@ -16,6 +18,10 @@
     			4	=> "kl_ku",
     			5	=> "u_name",
 			];
+			// 01<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+			// 02---> Array mit den Übersetzungen der Attribte  der Relation "Fahrt"
 			$spaltenBezeichnerFahrt = [
     			"f_id" 			=> "Fahrt ID",
     			"f_name"		=> "Fahrtname",
@@ -24,17 +30,25 @@
     			"kl_ku"			=> "Klasse_Kurs",
     			"f_unterkunft"	=> "Unterkunft",
 			];
-			$suchFenster = 0;
+			// 02<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+			$suchFenster = 0;  // Hat die Varibale suchFenster den Wert 1 öffnet sich ein zusätzliches Suchfenster
 			
+			
+			// 03---> Datenbankanbindung  ------------------------------------------------------------------------
 			$db = pg_connect("host=localhost port=5432 dbname=fahraway user=parallels password=niewel");
+			// 03<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
 			/*$fahrtSequenceNr = pg_query($db,"SELECT nextval ('fahrtSeq'));*/
 			if(	!array_key_exists('select',$_GET) ){
 				$where = "";
-			}
-			elseif (array_key_exists('select', $_GET) && array_key_exists('f_id',$_GET) ){
+			}elseif (array_key_exists('select', $_GET) && array_key_exists('f_id',$_GET) ){ // Aufruf von fahrt.php durch schueler.php
 				$where = "WHERE f.f_id =".$_GET['f_id'];
 			}
-			// START 01: Verhinderung von Fehlermeldungen ---------------------------------------------------------------------->	
+
+			// 04 --->  Verhinderung von Fehlermeldungen ---------------------------------------------------------
 
 			if(array_key_exists('sort',$_GET)){
 				$schalter = $_GET['sort'];
@@ -42,10 +56,9 @@
 				$schalter="";
 			}
 
-			// STOP 01 <---------------------------------------------------------------------------------------------------------
-			// <---------------------------------------------------------------------------------------------------------
+			// 04 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			
-			// START 02: Erweiterung der SELECT-Anweisung ---------------------------------------------------------------------->	
+			// 05 ---> Erweiterung der SELECT-Anweisung: Abhängig vom Modus -------------------------------------
 			
 			if 		($_GET['modus'] == 1){					// Zeige alle Datensätze
 
@@ -56,7 +69,7 @@
 				$suchfenster = 1;	
 				$where = '';
 				
-			}elseif ($_GET['modus'] == 3){					// Öffne Suchfenster und zeige alle Datensäte
+			}elseif ($_GET['modus'] == 3){					// Öffne Suchfenster und zeigt die selektierten Datensätze
 
 				$suchfenster = 1									;
 				if (is_numeric($_POST["f_id_input"])){
@@ -71,7 +84,11 @@
 
 			
 
-			// STOP  02 <---------------------------------------------------------------------------------------------------------
+			// 05 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+			// 06 ---> Sortiert die Datensätze abhängig vom Attribut aufsteigend -------------------------------
 			switch ($schalter) {
 				case "f_id":
 					$result = pg_query($db,
@@ -137,14 +154,13 @@
 												;
 								");
 			}
+			// 06 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-			if ($suchfenster == 1){
+			if ($suchfenster == 1){   // Der Link "suche" im Menue "Fahrten" wurde angeklickt
 
 
-		
-
-
+				// 07 ---> Zunächste werden alle Datensätze angezeigt
 				$formSelect = pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
 												FROM 				fahrt f 
@@ -152,15 +168,19 @@
 												ON 					(f.f_unterkunft=u.u_id)
 												;
 								");
+				// 07 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	
 
 
 				$index=0;
 
+				// 08 ---> Erstellen eines Arrays mit den f_id's . Die ID's werden für das Select-Menü benötigt
+
 				while($row=pg_fetch_assoc($formSelect)){
 					$fahrtID[$index] = $row[$attributeFahrt[0]]		;
 					$index++										;
 				}
+				// 08 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 				$operator[0]=">"	;
 				$operator[1]=">="	;
@@ -172,130 +192,80 @@
 				$verknuepfung[0] ="AND";
 				$verknuepfung[1] ="OR";
 
-				asort($fahrtID);	
+				asort($fahrtID);	// Sortierung der ID's
+
+
+
+				
 				echo'	<div id="suche">'																;
-				echo		'<form action="./fahrt.php?modus=3" method="post" autocomplete="off">'		;
+				echo		'<form action="./fahrt.php?modus=3" method="post" autocomplete="off">'		;   // Such-Formular f_id
 				echo			'<label>FahrtID:'														;
+
+				
+				// 09 ---> Auswahlmenü Operatoren --------------------------------------------------------------
 				echo			'<select name="f_id_operator">'											;
 				echo '				<option>---				</option>'									;
 				foreach ($operator as $key => $val) {	
 					if (array_key_exists('f_id_operator',$_POST) && $_POST['f_id_operator']== $val){
-						echo '				<option selected >'.$val.'</option>'											;
-					}else{
-						echo '				<option >'.$val.'</option>'											;
+						echo '				<option selected >'.$val.'</option>'						;  	// Nach der Suche werden die Suchparameter
+					}else{																					// automatisch voreingestellt
+						echo '				<option >'.$val.'</option>'									;
 					}
 				}
-				echo '			</select>'		;;	
-//-------------------------------------------------------------------------------------------------------------------------------------
+				echo '			</select>'																;	
+				// 09 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+				// 10 ---> Auswahlmenü f_id's -------------------------------------------------------------------
 				echo			'<select name="f_id">'													;
 				echo '				<option>---</option>'												;
 
 				foreach ($fahrtID as $key => $val) {	
 					if (array_key_exists('f_id',$_POST) && $_POST['f_id']== $val){
-						echo '				<option selected >'.$val.'</option>'											;
-					}else{
-						echo '				<option>'.$val.'</option>'											;
+						echo '				<option selected >'.$val.'</option>'						;	// Nach der Suche werden die Suchparameter
+					}else{																					// automatisch voreingestellt
+						echo '				<option>'.$val.'</option>'									;
 					}
 				}
 				
 				echo '			</select>'																;
+				// 10 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-//-------------------------------------------------------------------------------------------------------------------------------------
+				// 11 ---> Manuelle Eingabe der gesuchten f_id --------------------------------------------------
 				if (array_key_exists('f_id_input',$_POST) && $_POST['f_id_input'] != ''){
-					echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5" value='.$_POST['f_id_input'].'>'		;	
+					echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5" value='.$_POST['f_id_input'].'>'	; // Voreinstellung s.o	
 				}else{
-					echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5" >'		;	
+					echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5" >'									;	
 				}
+				// 11 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
 	
-//-------------------------------------------------------------------------------------------------------------------------------------
-				echo			'<select name="f_id_verknuepfung">'										;
-				echo '				<option>---				</option>'									;
+				// 12 ---> Auswahlmenü Verknüpfungsart -----------------------------------------------------------
+				echo			'<select name="f_id_verknuepfung">'												;
+				echo '				<option>---				</option>'											;
 				foreach ($verknuepfung as $key => $val) {	
 					if (array_key_exists('f_id_verknuepfung',$_POST) && $_POST['f_id_verknuepfung']== $val){
-						echo '				<option selected >'.$val.'</option>'											;
+						echo '				<option selected >'.$val.'</option>'								;
 					}else{
 						echo '				<option>'.$val.'</option>'											;
 					}
 				}
 
-				echo '			</select>'																;
+				echo '			</select>'																		;
+				// 12 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				echo '		</label>'																	;
 				echo '		<button type="submit" name="action" value="0">Suche</button>'				;
 				echo '	</form>'																		;
 				echo '</div>'																			;		
 			}
 
-//-------------------------------------------------------------------------------------------------------------------------------------
-/*
-				echo '			<input type="button" id="btnReset" value="Reset" onclick="Reset();" />'	;
-				echo '				<script type="text/javascript">'											;
-				echo '    				function Reset() {'													;
-        		echo '						var dropDown = document.getElementById("ddlFruits");'						;
-        		echo '						dropDown.selectedIndex = 0;'												;
-    			echo '					}'																		;
-				echo '				</script>"'																;
-
-				*/
-/*
-
-
-					echo "<table>";
-							echo "<tr>";
-								foreach ($spaltenBezeichnerFahrt as $key => $value)	{
-									if(array_key_exists('select',$_GET) && $_GET['select']==1){
-										echo "<th>". $value ."</th>";
-									}else{
-										echo "<th>". '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";
-									}
-								}
-							echo "</tr>";
-
-						while($row=pg_fetch_assoc($result)){
-							echo "<tr>";
-								foreach ($attributeFahrt as $value)	{
-									if($value == 'f_id') {
-										$fahrtID = $row[ $value ]; 
-									}
-									if ($row[ $value ] == ''){
-										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">FÜGE HINZU</a></td>';
-									}else{
-										echo "<td>" .$row[ $value] . "</td>";
-									}
-								}
-							echo "</tr>";
-						}
-			echo "</table>";
-				
-			}
-*/
 
 			echo'	<div id="rahmen_3">';
-
-
-					echo "<table>"													;
-							
-							foreach ($_POST as $key => $value)	{
-									echo "<tr>"										;
-									echo "<td>".$key."</dt><td>".$value."</dt>"		;	
-									echo "</tr>"									;
-							}
-					echo "</table>";
-					echo "<table>"													;
-							
-							foreach ($_GET as $key => $value)	{
-									echo "<tr>"										;
-									echo "<td>".$key."</dt><td>".$value."</dt>"		;	
-									echo "</tr>"									;
-							}
-									echo "<tr>"										;
-									echo "<td>Suchfenster</dt><td>".$suchfenster."</dt>"		;	
-									echo "<td>WHERE</dt><td>".$where."</dt>"		;	
-									echo "</tr>"									;
-					echo "</table>";
-
-
 					echo "<table>";
+
+							// 13 ---> Spaltenkopf/ -bezeichner -----------------------------------------------------------
 							echo "<tr>";
+
 								foreach ($spaltenBezeichnerFahrt as $key => $value)	{
 									if(array_key_exists('select',$_GET) && $_GET['select']==1){
 										echo "<th>". $value ."</th>";
@@ -304,21 +274,33 @@
 									}
 								}
 							echo "</tr>";
+							// 13 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+/*
+						// 14 ---> Zeigt die Datensätze in einer Tabelle --------------------------------------------------
+												".$where."
+						$result = pg_query($db,
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
+												FROM 				fahrt f, aktivitaeten a
+													
+												;
+						");
 
-
+*/						
 						while($row=pg_fetch_assoc($result)){
 							echo "<tr>";
+								
 								foreach ($attributeFahrt as $value)	{
 									if($value == 'f_id') {
 										$fahrtID = $row[ $value ]; 
 									}
-									if ($row[ $value ] == ''){
+									if ($row[ $value ] == ''){ 		// Lehre Felder werden rosa markiert 
 										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">FÜGE HINZU</a></td>';
 									}else{
 										echo "<td>" .$row[ $value] . "</td>";
 									}
 								}
 							echo "</tr>";
+						// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 						}
 			echo "</table>";
 		?>
