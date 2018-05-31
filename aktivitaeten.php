@@ -49,7 +49,7 @@
 				"jahrz4" 	=>	"Winter"		,
 				"mialt" 	=>	"Mindestalter"	,
 				"dauer" 	=>	"Dauer/h"		,
-				"akpreis" 	=>	"Prais"			,
+				"akpreis" 	=>	"Preis"			,
 				"ak_id" 	=>	"Fahrt"		,
 			];
 			// 02<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -98,6 +98,17 @@
 				$where = 'WHERE f_id'.$_POST["f_id_operator"] . $f_id;
 				
 				
+			}elseif ($_GET['modus'] == 5){					//	Fügt eine Fahrt hinzu 
+
+				$suchfenster = 1									;
+				if (is_numeric($_POST["f_id_input"])){
+					$f_id = $_POST["f_id_input"]					;
+				}else{
+					$f_id = $_POST["f_id"]							;
+				}
+				$where = 'WHERE f_id'.$_POST["f_id_operator"] . $f_id;
+				
+				
 			}
 
 			
@@ -115,14 +126,13 @@
 												FROM 				aktivitaet ak, anbieter an 
 												WHERE 				ak.anbietr = an.an_id;
 								");
-			}elseif( $schalter == "anbieter"){
+			}elseif( $schalter == "anbietr"){
 					$result = pg_query($db,
 											"	SELECT 				ak.ak_id,ak.bewert,ak.bezng,ak.art,ak.katgrie,ak.fabezg,ak.ort,
 																	ak.vorstzg,ak.jahrz1,ak.jahrz2,ak.jahrz3,ak.jahrz4,ak.mialt,
 																	ak.dauer,ak.akpreis,an.an_name
-												FROM 				aktivitaet ak
-												LEFT OUTER JOIN 	anbieter an 
-												ON 					(ak.anbietr = an.an_id)
+												FROM 				aktivitaet ak, anbieter an
+												WHERE 				ak.anbietr = an.an_id
 												ORDER BY			an.an_name;
 								");
 
@@ -131,9 +141,8 @@
 											"	SELECT 				ak.ak_id,ak.bewert,ak.bezng,ak.art,ak.katgrie,ak.fabezg,ak.ort,
 																	ak.vorstzg,ak.jahrz1,ak.jahrz2,ak.jahrz3,ak.jahrz4,ak.mialt,
 																	ak.dauer,ak.akpreis,an.an_name
-												FROM 				aktivitaet ak
-												LEFT OUTER JOIN 	anbietr an 
-												ON 					(ak.anbieter = an.an_id)
+												FROM 				aktivitaet ak, anbieter an 
+												WHERE 				ak.anbietr = an.an_id
 												ORDER BY			ak.".$schalter.";
 								");
 
@@ -171,12 +180,14 @@
 									if(array_key_exists('select',$_GET) && $_GET['select']==1){
 										echo "<th>". $value ."</th>";
 									}else{
-										echo "<th>". '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";
+										echo "<th>". '<a href="aktivitaeten.php?sort='.$key.'">'. $value ."</a></th>";
 									}
 								}
 							echo "</tr>";
 						echo "</THEAD>";
 						// 13 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+						// 14 ---> Anzeigen der Datensätze in Form einer Tabelle --------------------------------------
 
 						echo "<TBODY>";
 						while($row=pg_fetch_assoc($result)){
@@ -185,11 +196,13 @@
 								foreach ($attributeAktivitaeten as $value)	{
 									if ($row[ $value ] == ''){ 		// Leere Felder werden rosa markiert 
 										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id=">FÜGE HINZU</a></td>';
-									}elseif ($value  == "ak_id"){ 	
-										echo '<td>' . '<a href="fahrt.php?modus=4&ak_id="'. $row[$value].'">SHOW</a></td>';
-									}elseif($row[ $value ] == f){
+									}
+									elseif ($value  == 'ak_id'){ 	
+										echo '<td><a href="fahrt.php?modus=4&ak_id='. $row[ $value ].'">SHOW</a></td>';
+									}
+									elseif($row[ $value ] == 'f'){
 										echo "<td>nein</td>";
-									}elseif($row[ $value ] == t){
+									}elseif($row[ $value ] == 't'){
 										echo "<td>ja</td>";
 									}else{
 										echo "<td>". $row[ $value ] ."</td>";
@@ -197,6 +210,8 @@
 									}
 								}
 							echo "</tr>";
+							
+/*							echo "<tr>";*/
 						// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 						}
 						echo "</TBODY>";

@@ -27,7 +27,10 @@ html{
 	width				: 100%						;
 	line-height			: 1.8						;
 }
-
+#intro{
+	font-size			: 5em						;
+	text-align			: center					;
+}
 #suche{
 	margin				: 10px auto 10px auto		;
 	background-color	: #66ccff					;	 
@@ -74,30 +77,44 @@ html{
 	background-color: #8B5A2B	;
 }
 #navi{
-	height:20%;
-	margin-left:30px;
+	height			: 20%		;
+	margin-left		: 30px		;
+}
+#bus{
+	display			: block		;
+    margin-left		: auto		;
+    margin-right	: auto		;
+	position		: relative	;
+	top				: 50%		;
+	-webkit-transform: translateY(-50%)	;
+	-ms-transform	: translateY(-50%)	;
+	transform		: translateY(-50%)	;
 }
 /*============================================================*/
-#rahmen_3 {
+#rahmen_3,.rahmen_4 {
 	margin				: 10px auto 10px auto		;
 	background-color	: #66ccff					; 
 	border				: solid 2px black			;
-	border-radius		: 1%						;
 	height				: 52%						;
 	width				: 100%						;
+	overflow-x			: auto						;
+}
+.rahmen_4{
+	height				: 70%						;
 }
 
 td,th{
 	border				: solid black 2px	;
-	font-size			: 14px				;
+	font-size			: 12px				;
 	padding				: 3px				;	
 	background-color	: white				;
 	border-radius		: 1%				;
+	line-height			: 0.8				;
 	
 }
 table{
 	border				: solid black 2px	;
-	margin				: 0 auto			; 
+	margin				: 10px			; 
 }
 
 

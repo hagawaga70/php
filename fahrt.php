@@ -11,24 +11,30 @@
 
 			// 01---> Array mit den Attributen der Relation "Fahrt"
 			$attributeFahrt = [							
-    			0	=> "f_id",
-    			1	=> "f_name",
-    			2	=> "von",
-    			3	=> "bis",
-    			4	=> "kl_ku",
-    			5	=> "u_name",
+    			0	=> "f_id"		,
+    			1	=> "f_name"		,
+    			2	=> "von"		,
+    			3	=> "bis"		,
+    			4	=> "kl_ku"		,
+    			5	=> "u_name"		,
+    			6	=> "o_name"		,
+    			7	=> "dummy01"	,
+    			8	=> "dummy02"	,
 			];
 			// 01<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 			// 02---> Array mit den Übersetzungen der Attribte  der Relation "Fahrt"
 			$spaltenBezeichnerFahrt = [
-    			"f_id" 			=> "Fahrt ID",
-    			"f_name"		=> "Fahrtname",
-    			"von"			=> "von",
-    			"bis"			=> "bis",
-    			"kl_ku"			=> "Klasse_Kurs",
-    			"f_unterkunft"	=> "Unterkunft",
+    			"f_id" 			=> "Fahrt ID"		,
+    			"f_name"		=> "Fahrtname"		,
+    			"von"			=> "von"			,
+    			"bis"			=> "bis"			,
+    			"kl_ku"			=> "Klasse_Kurs"	,
+    			"f_unterkunft"	=> "Unterkunft"		,
+    			"o_name"		=> "Ort"			,
+    			"dummy01"		=> "Schueler"		,
+    			"dummy02"		=> "Lehrer"			,
 			];
 			// 02<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -80,7 +86,33 @@
 				$where = 'WHERE f_id'.$_POST["f_id_operator"] . $f_id;
 				
 				
+			}elseif ($_GET['modus'] == 4){					//	Das Skript fahrt.php wurde vom Skript aktivitaeten au
+															//  aufgerufen. fahrt.php zeigt jetzt nur die fahrten zur
+															//  übergebenen aktivitaeten_id an. 
+
+				$suchfenster = 0									;
+				$where = 'WHERE f.f_id IN (
+											SELECT 		f_id 
+											FROM 		wirdangeboten 
+											WHERE		ak_id ='. $_GET["ak_id"].'
+										)';
+				echo '<input id="ak_id" name="ak_id" type="hidden" value="'.$_GET["ak_id"].'">';	
+				
+			}elseif ($_GET['modus'] == 5){					//	Das Skript fahrt.php wurde vom Skript aktivitaeten au
+															//  aufgerufen. fahrt.php zeigt jetzt nur die fahrten zur
+															//  übergebenen aktivitaeten_id an. 
+
+				$suchfenster = 0									;
+				$where = 'WHERE f.f_id IN (
+											SELECT 		f_id 
+											FROM 		wirdangeboten 
+											WHERE		ak_id ='. $_GET["ak_id"].'
+										)';
+				echo '<input id="ak_id" name="ak_id" type="hidden" value="'.$_GET["ak_id"].'">';	
+				
 			}
+
+
 
 			
 
@@ -92,64 +124,90 @@
 			switch ($schalter) {
 				case "f_id":
 					$result = pg_query($db,
-											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
 												LEFT OUTER JOIN 	unterkunft u 
 												ON 					(f.f_unterkunft=u.u_id)
+												LEFT OUTER JOIN     ort o 
+												ON                  (u.u_ort = o.o_id)
 												ORDER BY			f.f_id;
 								");
 					break;
 				case "f_name":
 					$result = pg_query($db,
-											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
 												LEFT OUTER JOIN 	unterkunft u 
 												ON 					(f.f_unterkunft=u.u_id)
+												LEFT OUTER JOIN     ort o 
+												ON                  (u.u_ort = o.o_id)
 												ORDER BY			f.f_name;
 								");
 					break;
 				case "von":
 					$result = pg_query($db,
-											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
 												LEFT OUTER JOIN 	unterkunft u 
 												ON 					(f.f_unterkunft=u.u_id)
+												LEFT OUTER JOIN     ort o 
+												ON                  (u.u_ort = o.o_id)
 												ORDER BY			f.von;
 								");
 					break;
 				case "bis":
 					$result = pg_query($db,
-											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
 												LEFT OUTER JOIN 	unterkunft u 
 												ON 					(f.f_unterkunft=u.u_id)
+												LEFT OUTER JOIN     ort o 
+												ON                  (u.u_ort = o.o_id)
 												ORDER BY			f.bis;
 								");
 					break;
 				case "kl_ku":
 					$result = 	pg_query($db,
-											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
 												LEFT OUTER JOIN 	unterkunft u 
 												ON 					(f.f_unterkunft=u.u_id)
+												LEFT OUTER JOIN     ort o 
+												ON                  (u.u_ort = o.o_id)
 												ORDER BY			f.kl_ku;
 								");
 					break;
 				case "f_unterkunft":
 					$result = 	pg_query($db,
-											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
 												LEFT OUTER JOIN 	unterkunft u 
 												ON 					(f.f_unterkunft=u.u_id)
+												LEFT OUTER JOIN     ort o 
+												ON                  (u.u_ort = o.o_id)
 												ORDER BY			u.u_name;
 								");
 					break;
-				default:
-					$result = pg_query($db,
-											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
+				case "o_name":
+					$result = 	pg_query($db,
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
 												LEFT OUTER JOIN 	unterkunft u 
 												ON 					(f.f_unterkunft=u.u_id)
+												LEFT OUTER JOIN     ort o 
+												ON                  (u.u_ort = o.o_id)
+												ORDER BY			o.o_name;
+								");
+					break;
+
+				default:
+					$result = pg_query($db,
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name,o.o_name
+												FROM 				fahrt f 
+												LEFT OUTER JOIN 	unterkunft u 
+												ON 					(f.f_unterkunft=u.u_id)
+												LEFT OUTER JOIN     ort o 
+												ON                  (u.u_ort = o.o_id)
 												".$where."
 												;
 								");
@@ -162,10 +220,12 @@
 
 				// 07 ---> Zunächste werden alle Datensätze angezeigt
 				$formSelect = pg_query($db,
-											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
+											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name, o.o_name 
 												FROM 				fahrt f 
 												LEFT OUTER JOIN 	unterkunft u 
 												ON 					(f.f_unterkunft=u.u_id)
+												LEFT OUTER JOIN     ort o 
+												ON                  (u.u_ort = o.o_id)
 												;
 								");
 				// 07 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -269,11 +329,14 @@
 								foreach ($spaltenBezeichnerFahrt as $key => $value)	{
 									if(array_key_exists('select',$_GET) && $_GET['select']==1){
 										echo "<th>". $value ."</th>";
+									}elseif(array_key_exists('modus',$_GET) && $_GET['modus']==4){
+										echo "<th>". $value ."</th>";
 									}else{
 										echo "<th>". '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";
 									}
 								}
 							echo "</tr>";
+
 							// 13 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 /*
 						// 14 ---> Zeigt die Datensätze in einer Tabelle --------------------------------------------------
@@ -288,16 +351,21 @@
 */						
 						while($row=pg_fetch_assoc($result)){
 							echo "<tr>";
-								
+								$counter=0;	
 								foreach ($attributeFahrt as $value)	{
 									if($value == 'f_id') {
 										$fahrtID = $row[ $value ]; 
 									}
-									if ($row[ $value ] == ''){ 		// Lehre Felder werden rosa markiert 
+									if (($row[ $value ] == '' )&&( $counter==5)){ 		// Leere Felder werden rosa markiert 
 										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">FÜGE HINZU</a></td>';
+									}elseif( $value == "dummy01"){
+										echo '<td>' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">Show/Add</a></td>';
+									}elseif( $value == "dummy02"){
+										echo '<td>' . '<a href="addShowLehrer.php?sort=&f_id='.$fahrtID.'">Show/Add</a></td>';
 									}else{
 										echo "<td>" .$row[ $value] . "</td>";
 									}
+								$counter++;
 								}
 							echo "</tr>";
 						// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
