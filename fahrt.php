@@ -7,6 +7,7 @@
 	</head>
 	<body>
 		<?php
+
 			require("./navigationsMenue.php");			/*Der ausgelagerte Navigationsblock wird eingefügt*/
 
 			// 01---> Array mit den Attributen der Relation "Fahrt"
@@ -38,16 +39,40 @@
 			];
 			// 02<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-			$suchFenster = 0;  // Hat die Varibale suchFenster den Wert 1 öffnet sich ein zusätzliches Suchfenster
+			$suchFenster = 0;  // Hat die Variable suchFenster den Wert 1 öffnet sich ein zusätzliches Suchfenster
 			
 			
 			// 03---> Datenbankanbindung  ------------------------------------------------------------------------
 			$db = pg_connect("host=localhost port=5432 dbname=fahraway user=parallels password=niewel");
 			// 03<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+			
+
+			// Hinzufügen eines Datensatzes ------------------------------------------------------------------------
+			if(	array_key_exists('action',$_POST) && $_POST["action"] == 0){
+				$fahrtSequenceNr = pg_query($db,"SELECT nextval ('fahrtSeq')");
+				$attributeInsert="";
+				$valuesInsert="";
+				foreach ($attributeFahrt as $key => $val) {
+					if ($key < 4){
+						$attributeInsert=$attributeInsert.$val.",";
+						
+					}elseif($key==5){
+						$attributeInsert=$attributeInsert.$val;
+					}
+				}
+				$insert = "INSERT INTO fahrt (".$attributeInsert.") VALUES (1234, 'male', 99, 'UK', '31/05/2013')";
+
+				if (pg_query($db,$insert)) {
+					echo "Data entered successfully. ";
+				}else {
+					echo "Data entry unsuccessful. ";
+				
 
 
-			/*$fahrtSequenceNr = pg_query($db,"SELECT nextval ('fahrtSeq'));*/
+
+
+
 			if(	!array_key_exists('select',$_GET) ){
 				$where = "";
 			}elseif (array_key_exists('select', $_GET) && array_key_exists('f_id',$_GET) ){ // Aufruf von fahrt.php durch schueler.php
@@ -103,12 +128,7 @@
 															//  übergebenen aktivitaeten_id an. 
 
 				$suchfenster = 0									;
-				$where = 'WHERE f.f_id IN (
-											SELECT 		f_id 
-											FROM 		wirdangeboten 
-											WHERE		ak_id ='. $_GET["ak_id"].'
-										)';
-				echo '<input id="ak_id" name="ak_id" type="hidden" value="'.$_GET["ak_id"].'">';	
+				$where = '';
 				
 			}
 
@@ -321,6 +341,8 @@
 
 
 			echo'	<div id="rahmen_3">';
+			
+
 					echo "<table>";
 
 							// 13 ---> Spaltenkopf/ -bezeichner -----------------------------------------------------------
@@ -338,6 +360,68 @@
 							echo "</tr>";
 
 							// 13 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+						if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 5) {
+							define("L_LANG", "de_DE"); // Sprachauswahl für die Kalenderfuntion
+							require('calendar/tc_calendar.php');
+
+							//$date3_default = "2018-05-28";
+							//$date4_default = "2018-05-28";
+
+									 
+							
+						?>
+						<tr>
+							<td	class= "gelb">
+							</td>					
+							<td	class= "gelb">			
+								<input type="text" name="f_name" size="6"/>					
+							</td>					
+							<td class= "gelb">
+
+								<?php
+ 										$myCalendar = new tc_calendar("date3", true, false)			;
+									  	$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
+									  	$myCalendar->setDate(date('d', strtotime($date3_default))
+											, date('m', strtotime($date3_default))
+											, date('Y', strtotime($date3_default)))					;
+									 	$myCalendar->setPath("calendar/")							;
+									  	$myCalendar->setYearInterval(1970, 2030)					;
+									  	$myCalendar->setAlignment('left', 'bottom')					;
+									  	//$myCalendar->setDatePair('date3', 'date4', $date4_default)	;
+									  	$myCalendar->writeScript()									;	  
+
+								?>
+							</td>					
+							<td class= "gelb">
+
+									<?php
+												$myCalendar = new tc_calendar("date4", true, false)			;
+												$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
+												$myCalendar->setDate(date('d', strtotime($date4_default))
+													, date('m', strtotime($date4_default))
+													, date('Y', strtotime($date4_default)))					;
+												$myCalendar->setPath("calendar/")							;
+												$myCalendar->setYearInterval(1970, 2030)					;
+												$myCalendar->setAlignment('left', 'bottom')					;
+												//$myCalendar->setDatePair('date3', 'date4', $date4_default)	;
+												$myCalendar->writeScript()									;	  
+									?>
+							</td>				
+		
+							<td	class= "gelb">					
+								<input type="text" name="kl_ku" size="1"/>			
+								<input id="ak_id" name="modus" type="hidden" value="'.$_GET["ak_id"].'">';	
+							</td>					
+							<td	class= "gelb" colspan="4">		
+								<button type="submit" name="action" value="0">ADD</button>		
+							</td>					
+						</tr>
+						<?php
+						}
+
+
+
 /*
 						// 14 ---> Zeigt die Datensätze in einer Tabelle --------------------------------------------------
 												".$where."
@@ -368,10 +452,27 @@
 								$counter++;
 								}
 							echo "</tr>";
-						// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 						}
+							
+						// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+												/*
+<!--
+			<form name="insert" action="insertShow.php" method="POST" >
+				<li>Nachname:</li>
+
+				<li>Vorname:</li>
+				<li><input type="text" name="vorname" /></li>
+
+				<li>Geschlecht:</li>
+				<li><input type="text" name="geschlecht" /></li>
+
+				<li><input type="submit" /></li>
+			</form>
+-->
+						*/
 			echo "</table>";
 		?>
 		</div>
 	</body>
 </html>
+

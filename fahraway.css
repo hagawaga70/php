@@ -11,6 +11,14 @@ html{
 	
 }
 
+.dunkelbraun{
+	background-color	: #8b4513			;
+	text-align			: center			;
+}
+.gelb{
+	background-color	: #ffb90f;
+	text-align			: center			;
+}
 /*>>>>>>>>>>Markierungen>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 .rosa{
 	background-color	: #ffc1c1			;
