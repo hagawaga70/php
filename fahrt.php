@@ -45,10 +45,30 @@
 			// 03---> Datenbankanbindung  ------------------------------------------------------------------------
 			$db = pg_connect("host=localhost port=5432 dbname=fahraway user=parallels password=niewel");
 			// 03<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 			
+			$fehlermeldung='';
+			if(	array_key_exists('action',$_POST) && $_POST["action"] == 1){
+				//$insert = "DEINTO fahrt (".$attributeInsert.") VALUES (".$valuesInsert .")"	;
+				$delete = "	DELETE FROM fahrt 
+							WHERE		f_id="	.	$_POST['loeschen']	.	
+							";"	;
+				$note = pg_query($db,$delete);
+/*														;
+				print_r($delete)	;
+				echo '<pre>';
+				var_dump($_GET)		;
+				var_dump($_POST)	;
+				echo '</pre>'		;
+*/
+				if (pg_query($db,$delete)) {
+				}else {
+				
+					$fehlermeldung=pg_last_error($db); 
+					print_r(pg_last_error($db)); 
+				}
+			}			
 
-			// Hinzufügen eines Datensatzes ------------------------------------------------------------------------
+			// 031 Hinzufügen eines Datensatzes ------------------------------------------------------------------------
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 0){
 				$result= pg_query($db,"SELECT nextval ('fahrtSeq')");
 				while($row=pg_fetch_assoc($result)){
@@ -60,20 +80,21 @@
 					if ($key == 0){
 						$attributeInsert	= $attributeInsert .$val .							","	;			
 						$valuesInsert 		= $valuesInsert .	$fahrtSequenceNr .				","	;
-						
 					}elseif ($key <= 3){
 						$attributeInsert	= $attributeInsert.$val.							","	;			
 						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'".		","	;
-						
 					}elseif($key==4){
 						$attributeInsert	= $attributeInsert.$val									;			
 						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'"			;
 					}
 				}
 				$insert = "INSERT INTO fahrt (".$attributeInsert.") VALUES (".$valuesInsert .")"	;
+				$note = pg_query($db,$insert)														;
+				echo '<pre>';
 /*				print_r($insert);*/
-/*				var_dump($_GET);*/
-/*				var_dump($_POST);*/
+				var_dump($_GET)		;
+				var_dump($_POST)	;
+				echo '</pre>'		;
 /*
 				if (pg_query($db,$insert)) {
 					print_r( "Data entered successfully. ");
@@ -82,7 +103,8 @@
 					print_r(pg_last_error($db)); 
 				}
 */
-		}
+			}
+			// 031 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 
@@ -137,12 +159,10 @@
 										)';
 				echo '<input id="ak_id" name="ak_id" type="hidden" value="'.$_GET["ak_id"].'">';	
 				
-			}elseif ($_GET['modus'] == 5){					//	Das Skript fahrt.php wurde vom Skript aktivitaeten au
-															//  aufgerufen. fahrt.php zeigt jetzt nur die fahrten zur
-															//  übergebenen aktivitaeten_id an. 
+			}elseif ($_GET['modus'] == 5){				
 
-				$suchfenster = 0									;
-				$where = '';
+				$suchfenster = 0	;
+				$where = ''			;
 				
 			}
 
@@ -356,6 +376,10 @@
 
 			echo'	<div id="rahmen_3">';
 			
+					if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {
+						echo '<form name="delete" action="fahrt.php" method="POST" >';
+						echo	'<fieldset>'	;
+					}
 
 					echo "<table>";
 
@@ -371,8 +395,13 @@
 										echo '<th class="grau">' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";
 									}
 								}
+							
+							if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {
+								echo '<td class="rot"><button type="submit" name="action" value="1">DELETE</button></td>'	;
+							}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {
+								echo '<td class="rot"><button type="submit" name="action" value="2">EDIT</button></td>'	;
+							}		
 							echo "</tr>";
-
 							// 13 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 						if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 5) {
@@ -438,7 +467,7 @@
 						}
 
 
-						// 14 ---> Zeigt die Datensätze in einer Tabelle --------------------------------------------------
+						// 14 ---> Zeigt die Datensätze in einer Tabelle an--------------------------------------------------
 					
 						while($row=pg_fetch_assoc($result)){
 							echo "<tr>";
@@ -456,28 +485,23 @@
 									}else{
 										echo "<td>" .$row[ $value] . "</td>";
 									}
-								$counter++;
+						
+									
+									$counter++;
 								}
-								
+								if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 6) {
+										echo '<td class="rot"><input type="radio" id="'. $fahrtID .'" name="loeschen" value="'. $fahrtID .'">'	;
+								}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] == 7) {
+										echo '<td class="rot"><input type="radio" id="'. $fahrtID .'" name="editieren" value="'. $fahrtID .'">'	;
+								}
 							echo "</tr>";
 						}
-										/*
-											<form>
-										  <p>Geben Sie Ihre Zahlungsweise an:</p>
-										  <fieldset>
-											<input type="radio" id="mc" name="Zahlmethode" value="Mastercard">
-											<label for="mc"> Mastercard</label> 
-											<input type="radio" id="vi" name="Zahlmethode" value="Visa">
-											<label for="vi"> Visa</label>
-											<input type="radio" id="ae" name="Zahlmethode" value="AmericanExpress">
-											<label for="ae"> American Express</label> 
-										  </fieldset>
-										</form>		
-										*/
 
 						
 								// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-					echo "</table>";
+					echo "</table>"	;
+				echo '</fieldset>'	;
+			echo '</form>'			;		
 				?>
 				</div>
 			</body>

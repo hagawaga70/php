@@ -16,7 +16,8 @@
   					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php?modus=1"			>Show	</a>	</div> 
 					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php?modus=2"			>Search	</a>    </div> 
 					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php?modus=5"			>Add	</a>  	</div> 
-					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php?modus=6"			>Edit	</a>  	</div> 
+					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php?modus=7"			>Edit	</a>  	</div> 
+					<div class="naviInline"><a class="ankerNavi"  href="fahrt.php?modus=6"			>Delete </a>  	</div> 
 			</div> 
 			<div class="naviBox"> 
   					<div class="naviInline">Unterkünfte:											</div> 
