@@ -50,25 +50,39 @@
 
 			// Hinzufügen eines Datensatzes ------------------------------------------------------------------------
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 0){
-				$fahrtSequenceNr = pg_query($db,"SELECT nextval ('fahrtSeq')");
+				$result= pg_query($db,"SELECT nextval ('fahrtSeq')");
+				while($row=pg_fetch_assoc($result)){
+					$fahrtSequenceNr = $row['nextval'];
+				}
 				$attributeInsert="";
 				$valuesInsert="";
 				foreach ($attributeFahrt as $key => $val) {
-					if ($key < 4){
-						$attributeInsert=$attributeInsert.$val.",";
+					if ($key == 0){
+						$attributeInsert	= $attributeInsert .$val .							","	;			
+						$valuesInsert 		= $valuesInsert .	$fahrtSequenceNr .				","	;
 						
-					}elseif($key==5){
-						$attributeInsert=$attributeInsert.$val;
+					}elseif ($key <= 3){
+						$attributeInsert	= $attributeInsert.$val.							","	;			
+						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'".		","	;
+						
+					}elseif($key==4){
+						$attributeInsert	= $attributeInsert.$val									;			
+						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'"			;
 					}
 				}
-				$insert = "INSERT INTO fahrt (".$attributeInsert.") VALUES (1234, 'male', 99, 'UK', '31/05/2013')";
-
+				$insert = "INSERT INTO fahrt (".$attributeInsert.") VALUES (".$valuesInsert .")"	;
+/*				print_r($insert);*/
+/*				var_dump($_GET);*/
+/*				var_dump($_POST);*/
+/*
 				if (pg_query($db,$insert)) {
-					echo "Data entered successfully. ";
+					print_r( "Data entered successfully. ");
 				}else {
-					echo "Data entry unsuccessful. ";
-				
-
+					print_r( "Data entry unsuccessful. ");
+					print_r(pg_last_error($db)); 
+				}
+*/
+		}
 
 
 
@@ -350,11 +364,11 @@
 
 								foreach ($spaltenBezeichnerFahrt as $key => $value)	{
 									if(array_key_exists('select',$_GET) && $_GET['select']==1){
-										echo "<th>". $value ."</th>";
+										echo '<th class="grau">'. $value ."</th>";
 									}elseif(array_key_exists('modus',$_GET) && $_GET['modus']==4){
-										echo "<th>". $value ."</th>";
+										echo '<th class="grau">'. $value ."</th>";
 									}else{
-										echo "<th>". '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";
+										echo '<th class="grau">' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";
 									}
 								}
 							echo "</tr>";
@@ -372,67 +386,60 @@
 							
 						?>
 						<tr>
-							<td	class= "gelb">
-							</td>					
-							<td	class= "gelb">			
-								<input type="text" name="f_name" size="6"/>					
-							</td>					
-							<td class= "gelb">
+							<form name="insert" action="fahrt.php" method="POST" >
+									<td	class= "gelb">
+									</td>					
+									<td	class= "gelb">			
+										<input type="text" name="f_name" size="6"/>					
+									</td>					
+									<td class= "gelb">
 
-								<?php
- 										$myCalendar = new tc_calendar("date3", true, false)			;
-									  	$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
-									  	$myCalendar->setDate(date('d', strtotime($date3_default))
-											, date('m', strtotime($date3_default))
-											, date('Y', strtotime($date3_default)))					;
-									 	$myCalendar->setPath("calendar/")							;
-									  	$myCalendar->setYearInterval(1970, 2030)					;
-									  	$myCalendar->setAlignment('left', 'bottom')					;
-									  	//$myCalendar->setDatePair('date3', 'date4', $date4_default)	;
-									  	$myCalendar->writeScript()									;	  
-
-								?>
-							</td>					
-							<td class= "gelb">
-
-									<?php
-												$myCalendar = new tc_calendar("date4", true, false)			;
+										<?php
+												$myCalendar = new tc_calendar("von", true, false)			;
 												$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
-												$myCalendar->setDate(date('d', strtotime($date4_default))
-													, date('m', strtotime($date4_default))
-													, date('Y', strtotime($date4_default)))					;
+												$myCalendar->setDate(date('d', strtotime($date3_default))
+													, date('m', strtotime($date3_default))
+													, date('Y', strtotime($date3_default)))					;
 												$myCalendar->setPath("calendar/")							;
 												$myCalendar->setYearInterval(1970, 2030)					;
 												$myCalendar->setAlignment('left', 'bottom')					;
 												//$myCalendar->setDatePair('date3', 'date4', $date4_default)	;
 												$myCalendar->writeScript()									;	  
-									?>
-							</td>				
-		
-							<td	class= "gelb">					
-								<input type="text" name="kl_ku" size="1"/>			
-								<input id="ak_id" name="modus" type="hidden" value="'.$_GET["ak_id"].'">';	
-							</td>					
-							<td	class= "gelb" colspan="4">		
-								<button type="submit" name="action" value="0">ADD</button>		
-							</td>					
+
+										?>
+									</td>					
+									<td class= "gelb">
+
+											<?php
+														$myCalendar = new tc_calendar("bis", true, false)			;
+														$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
+														$myCalendar->setDate(date('d', strtotime($date4_default))
+															, date('m', strtotime($date4_default))
+															, date('Y', strtotime($date4_default)))					;
+														$myCalendar->setPath("calendar/")							;
+														$myCalendar->setYearInterval(1970, 2030)					;
+														$myCalendar->setAlignment('left', 'bottom')					;
+														//$myCalendar->setDatePair('date3', 'date4', $date4_default)	;
+														$myCalendar->writeScript()									;	  
+														
+/*														<input id="ak_id" name="modus" type="hidden" value="'.$_GET["ak_id"].'">';	*/
+											?>
+									</td>				
+				
+									<td	class= "gelb">					
+										<input type="text" name="kl_ku" size="1"/>			
+									</td>					
+									<td	class= "gelb" colspan="4">		
+										<button type="submit" name="action" value="0">ADD</button>		
+									</td>					
+							</form>
 						</tr>
 						<?php
 						}
 
 
-
-/*
 						// 14 ---> Zeigt die Datensätze in einer Tabelle --------------------------------------------------
-												".$where."
-						$result = pg_query($db,
-											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name 
-												FROM 				fahrt f, aktivitaeten a
-													
-												;
-						");
-
-*/						
+					
 						while($row=pg_fetch_assoc($result)){
 							echo "<tr>";
 								$counter=0;	
@@ -451,28 +458,28 @@
 									}
 								$counter++;
 								}
+								
 							echo "</tr>";
 						}
-							
-						// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-												/*
-<!--
-			<form name="insert" action="insertShow.php" method="POST" >
-				<li>Nachname:</li>
+										/*
+											<form>
+										  <p>Geben Sie Ihre Zahlungsweise an:</p>
+										  <fieldset>
+											<input type="radio" id="mc" name="Zahlmethode" value="Mastercard">
+											<label for="mc"> Mastercard</label> 
+											<input type="radio" id="vi" name="Zahlmethode" value="Visa">
+											<label for="vi"> Visa</label>
+											<input type="radio" id="ae" name="Zahlmethode" value="AmericanExpress">
+											<label for="ae"> American Express</label> 
+										  </fieldset>
+										</form>		
+										*/
 
-				<li>Vorname:</li>
-				<li><input type="text" name="vorname" /></li>
-
-				<li>Geschlecht:</li>
-				<li><input type="text" name="geschlecht" /></li>
-
-				<li><input type="submit" /></li>
-			</form>
--->
-						*/
-			echo "</table>";
-		?>
-		</div>
-	</body>
-</html>
+						
+								// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+					echo "</table>";
+				?>
+				</div>
+			</body>
+		</html>
 
