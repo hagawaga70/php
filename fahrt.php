@@ -7,6 +7,17 @@
 	</head>
 	<body>
 		<?php
+					
+			// POST action 1   Entfernen eines Datensatzes
+			// POST action 0   Hinzufügen eines Datensatzes
+			// GET  modus	5	Hinzufügen eines Datensatzes
+			// POST action 3	Editieren eines Datensatzes
+			// GET  modus  1 	Zeige alle Datensätze
+			// GET  modus  2 	Öffnet das Suchfenster und zeigt  alle Datensätze
+			// GET  modus  3 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze
+			// POST action 5 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  // action und der Wert 5 werden nirgends weiter abgefragt
+			// GET  modus  4   fahrt.php wird von aktivitaeten aufgerufen und zeigt alle Fahrten zu einer bestimmten Aktivität an 	
+
 
 			require("./navigationsMenue.php");			/*Der ausgelagerte Navigationsblock wird eingefügt*/
 
@@ -417,11 +428,29 @@
 
 								foreach ($spaltenBezeichnerFahrt as $key => $value)	{					// Spaltenkopfbezeichner mit und ohne Link
 									if(array_key_exists('select',$_GET) && $_GET['select']==1){			// zum Sortieren der Datensätze
-										echo '<th class="grau">'. $value ."</th>";						// |
+										if($key == "dummy01" || $key == "dummy02"){
+											echo '<th class="grau" colspan="3">'. $value ."</th>";		// |
+										}elseif($key == "f_id"){
+											echo '<th class="grau" colspan="3">'. $value ."</th>";		// |
+										}else{
+											echo '<th class="grau">'. $value ."</th>";					// |
+										}
 									}elseif(array_key_exists('modus',$_GET) && $_GET['modus']==4){		// |
-										echo '<th class="grau">'. $value ."</th>";						// |
+										if($key == "dummy01" || $key == "dummy02"){
+											echo '<th class="grau colspan="3"">'. $value ."</th>";		// |
+										}elseif ($key == "f_id"){
+											echo '<th class="grau colspan="3"">'. $value ."</th>";		// |
+										}else{
+											echo '<th class="grau">'. $value ."</th>";					// |
+										}
 									}else{																// |
-										echo '<th class="grau">' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";	// |
+										if($key == "dummy01" || $key == "dummy02"){
+											echo '<th class="grau" colspan="3">' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";	// |
+										}elseif($key == "f_id"){
+											echo '<th class="grau" colspan="3">' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";	// |
+										}else{
+											echo '<th class="grau" >' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";	// |
+										}
 									}
 								}
 							
@@ -470,7 +499,7 @@
 							
 						echo '<tr>';
 						echo 	'<form name="insert" action="fahrt.php" method="POST" >'													;
-						echo		'<td	class= "gelb">'																					;
+						echo		'<td	class= "gelb" colspan="3">'																					;
 						echo 			'<input id="f_id" name="f_id" type="hidden" value="'. $SpeicherDefaultWertePuffer['f_id'] . '">'	; // Versteckte f_id	
 						echo 		'</td>'																									;
 						echo 		'<td	class= "gelb">'																					;
@@ -509,7 +538,7 @@
 						echo 		'<td	class= "gelb">'																				;
 						echo 			'<input type="text" name="kl_ku" size="1" value="' .$SpeicherDefaultWertePuffer['kl_ku']. '"/>' ; // Inputfield "kl_ku"
 						echo 		'</td>'																								; // & Defaultwert
-						echo 		'<td	class= "gelb" colspan="4">'																	;
+						echo 		'<td	class= "gelb" colspan="8">'																	;
 						
 						if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 5)){
 								echo 			'<button type="submit" name="action" value="0">ADD</button>	'							; 	// Einfügen des ADD
@@ -531,15 +560,21 @@
 										$fahrtID = $row[ $value ]; 
 									}
 									
-									if (($row[ $value ] == '' )&&( $counter==5)){ 		// Leere Felder werden rosa markiert 
+									if (($value != 'dummy01') &&($value != 'dummy02') && ($row[ $value ] == '' )&&( $counter==5)){ // Leere Felder werden rosa markiert 
 										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">&#x2795;</a></td>';
 										//echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">ADD</a></td>';
 									}elseif( $value == "dummy01"){
-										echo '<td>' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">Show/Add</a></td>';		// Einfügen eines Links
+										echo '<td class="hellgrau">' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">&#x1f441;</a></td>';	// Link
+										echo '<td class="hellgrau">' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">&#x2795;</a></td>'	; 	// Link
+										echo '<td class="hellgrau">' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">&#x2796;</a></td>';  	// Link
 									}elseif( $value == "dummy02"){
-										echo '<td>' . '<a href="addShowLehrer.php?sort=&f_id='.$fahrtID.'">Show/Add</a></td>';		// Einfügen eines Links
+										echo '<td class="grau">' . '<a href="addShowLehrer.php?sort=&f_id='.$fahrtID.'">&#x1f441;</a></td>';	// Link
+										echo '<td class="grau">' . '<a href="addShowLehrer.php?sort=&f_id='.$fahrtID.'">&#x2795;</a></td>';		// Link
+										echo '<td class="grau">' . '<a href="addShowLehrer.php?sort=&f_id='.$fahrtID.'">&#x2796;</a></td>';		// Link
 									}elseif( $value == 'f_id'){
-										echo '<td>' . '<a href="unterkunft.php?modus=1&f_id='.$fahrtID.'">Show/Add/Delete</a></td>'; // Einfügen eines Links
+										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&f_id='.$fahrtID.'">&#x1f441;</a></td>'; // Link
+										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&f_id='.$fahrtID.'">&#x2795;</a></td>';  // Link
+										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&f_id='.$fahrtID.'">&#x2796;</a></td>';  // Link
 									}else{
 										echo "<td>" .$row[ $value] . "</td>";
 									}

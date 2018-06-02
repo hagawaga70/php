@@ -6,6 +6,7 @@
 		<link rel="stylesheet" href="./fahraway.css">
 	</head>
 	<body>
+				
 				<?php
 					  define("L_LANG", "de_DE");
 					

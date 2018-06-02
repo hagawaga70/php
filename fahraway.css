@@ -19,8 +19,16 @@ html{
 	background-color	: #ffb90f;
 	text-align			: center			;
 }
+.dunkelgrau{
+	background-color	: #a4a4a4			;
+	text-align			: center			;
+}
 .grau{
-	background-color	: #dddddd			;
+	background-color	: #bdbdbd			;
+	text-align			: center			;
+}
+.hellgrau{
+	background-color	: #d8d8d8			;
 	text-align			: center			;
 }
 .rot{

@@ -36,9 +36,9 @@
 					<div class="naviInline"><a class="ankerNavi"  href="schueler.php">Suche</a>	    </div> 
 			</div> 
 			<div class="naviBox"> 
-  					<div class="naviInline">Lehrer:													</div> 
-  					<div class="naviInline"><a class="ankerNavi"  href="index.php">Zeige</a>		</div> 
-					<div class="naviInline"><a class="ankerNavi"  href="index.php">Suche</a>	    </div> 
+  					<div class="naviInline">Lehrer:																</div> 
+  					<div class="naviInline"><a class="ankerNavi"  href="lehrer.php?modus=1">Zeige</a>			</div> 
+					<div class="naviInline"><a class="ankerNavi"  href="index.php">Suche</a>	    			</div> 
 			</div> 
 				
 		
