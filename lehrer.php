@@ -7,16 +7,30 @@
 	</head>
 	<body>
 		<?php
-					
-			// POST action 1   Entfernen eines Datensatzes
-			// POST action 0   Hinzufügen eines Datensatzes
-			// GET  modus	5	Hinzufügen eines Datensatzes
+
+			// GET  modus	1 2 3 4 5 8
+			// POST action  0 1 3 5   8
+			// ------------------------------------------------------
+			// POST action 1   	Entfernen eines Datensatzes
+			// ------------------------------------------------------
+			// POST action 0  	Hinzufügen eines Datensatzes
+			// GET  modus  5	Hinzufügen eines Datensatzes
+			// ------------------------------------------------------
 			// POST action 3	Editieren eines Datensatzes
+			// ------------------------------------------------------
 			// GET  modus  1 	Zeige alle Datensätze
+			// ------------------------------------------------------
 			// GET  modus  2 	Öffnet das Suchfenster und zeigt  alle Datensätze
+			// ------------------------------------------------------
 			// GET  modus  3 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze
 			// POST action 5 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  // action und der Wert 5 werden nirgends weiter abgefragt
-			// GET  modus  4   lehrer.php wird von aktivitaeten aufgerufen und zeigt alle Lehreren zu einer bestimmten Aktivität an 	
+			// ------------------------------------------------------
+			// GET  modus  4   	lehrer.php wird von aktivitaeten aufgerufen und zeigt alle Lehreren zu einer bestimmten Aktivität an 	
+			// ------------------------------------------------------
+			// POST action
+			// GET  modus  8   	lehrer.php wird fahrt.php aufgerufen. 
+			//					A)	Ein bestehender Lehrerdatensatz (l_id) wird mit der f_id in der Relation begleitet eingetragen
+			//					B)  Ein neuer Lehrerdatensatz wird angelegt. Die l_id und die f_id werden in der Relation begleitet abgespeichert
 
 
 			require("./navigationsMenue.php");			/*Der ausgelagerte Navigationsblock wird eingefügt*/
@@ -34,7 +48,7 @@
 
 			// ---> Array mit den Übersetzungen der Attribte  der Relation "Lehrer"------------------------------->
 			$spaltenBezeichnerLehrer = [
-    			"l_id" 			=> "Lehrer"			,
+    			"l_id" 			=> "Fahrt"			,
     			"anrede"		=> "Anrede"			,
     			"vname"			=> "Vorname"		,
     			"nname"			=> "Nachname"		,
@@ -363,11 +377,14 @@
 			echo'	<div id="rahmen_3">';
 			
 					if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {				// Der Delete-Button wird angehängt
-						echo '<form name="delete" action="lehrer.php" method="POST" >'	;		// Das fieldset wird für die Radio-Button benötigt
-						echo	'<fieldset>'											;
+						echo '<form name="delete" action="lehrer.php" method="POST" >'		;	// Das fieldset wird für die Radio-Button benötigt
+						echo	'<fieldset>'												;
 					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {		// Der Edit-Button wird angehängt
 						echo '<form name="edit" action="lehrer.php" method="POST" >'		;
-						echo	'<fieldset>'											; 		// Das fieldset wird für den Edit-Button benötigt
+						echo	'<fieldset>'												; 	// Das fieldset wird für den Edit-Button benötigt
+					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==8) {		
+						echo '<form name="edit" action="lehrer.php" method="POST" >'		;
+						echo	'<fieldset>'												; 	
 					}
 
 
@@ -376,64 +393,43 @@
 							// 13 ---> Spaltenkopf/ -bezeichner -----------------------------------------------------------
 							echo "<tr>";
 
-								foreach ($spaltenBezeichnerLehrer as $key => $value)	{					// Spaltenkopfbezeichner mit und ohne Link
+								foreach ($spaltenBezeichnerLehrer as $key => $value)	{				// Spaltenkopfbezeichner mit und ohne Link
 									if(array_key_exists('select',$_GET) && $_GET['select']==1){			// zum Sortieren der Datensätze
-										if($key == "dummy01" || $key == "dummy02"){
-											echo '<th class="grau" colspan="3">'. $value ."</th>";		// |
-										}elseif($key == "l_id"){
-											echo '<th class="grau" colspan="3">'. $value ."</th>";		// |
-										}else{
 											echo '<th class="grau">'. $value ."</th>";					// |
-										}
 									}elseif(array_key_exists('modus',$_GET) && $_GET['modus']==4){		// |
-										if($key == "dummy01" || $key == "dummy02"){
-											echo '<th class="grau colspan="3"">'. $value ."</th>";		// |
-										}elseif ($key == "l_id"){
-											echo '<th class="grau colspan="3"">'. $value ."</th>";		// |
-										}else{
 											echo '<th class="grau">'. $value ."</th>";					// |
-										}
 									}else{																// |
-										if($key == "dummy01" || $key == "dummy02"){
-											echo '<th class="grau" colspan="3">' . '<a href="lehrer.php?sort='.$key.'">'. $value ."</a></th>";	// |
-										}elseif($key == "l_id"){
-											echo '<th class="grau" colspan="3">' . '<a href="lehrer.php?sort='.$key.'">'. $value ."</a></th>";	// |
-										}else{
 											echo '<th class="grau" >' . '<a href="lehrer.php?sort='.$key.'">'. $value ."</a></th>";	// |
-										}
 									}
 								}
 							
-							if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {				// Anfügen des Delete-Button
+							if(			array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {				// Anfügen des Delete-Button
 								echo '<td class="rot"><button type="submit" name="action" value="1">DELETE</button></td>'	;
 							}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {		// Anfügen des Edit-Button
 								echo '<td class="rot"><button type="submit" name="action" value="2">EDIT</button></td>'	;
+							}elseif(		array_key_exists('modus',$_GET) && $_GET['modus'] ==8) {		// Anfügen des Edit-Button
+								echo '<td class="rot"><button type="submit" name="action" value="8">SELECT</button></td>'	;
 							}		
 							echo "</tr>";
-							// 13 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+							// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-						if(	(array_key_exists('modus',$_GET) 	&& $_GET['modus'] 		== 5) ||		// ADD
+						if(	(array_key_exists('modus',$_GET) 	&& $_GET['modus'] 		== 8 ) ||		// vormals 5 ADD
 							(array_key_exists('action',$_POST) 	&& $_POST["action"] 	== 2)			// Edit
 						  )  {
-							define("L_LANG", "de_DE"); // Sprachauswahl für die Kalenderfuntion
-							require('calendar/tc_calendar.php');
-							
-							if	(array_key_exists('action',$_POST) && $_POST["action"] 	== 2){			//Edit 
 
 								$defaultValuesEdit = pg_query($db,
-														"	SELECT 		f.l_id, f.f_name, f.von, f.bis, f.kl_ku, f.f_unterkunft 
-															FROM 		lehrer f 
-															WHERE		f.l_id=" . $_POST['editieren']. "		
+														"	SELECT 		l.l_id, l.anrede, l.vname, l.nname, l.telnr
+															FROM 		lehrer l 
+															WHERE		l.l_id=" . $_POST['editieren']. "		
 															;
 													");								// SELECT-Anfrage für die Defaultwerte der Formularelemente (Editieren)
 
 								$SpeicherDefaultWerte= [							// Array zum Speichern der Defaultwerte der Formularlemente (Editieren)
 										"l_id" 			=> ""		,
-										"f_name"		=> ""		,
-										"von"			=> ""		,
-										"bis"			=> ""		,
-										"kl_ku"			=> ""		,
-										"f_unterkunft"	=> ""		,
+										"anrede"		=> ""		,
+										"vname"			=> ""		,
+										"nname"			=> ""		,
+										"telnr"			=> ""		,
 									];
 
 								$row=pg_fetch_assoc($defaultValuesEdit);
@@ -442,95 +438,49 @@
 									$SpeicherDefaultWertePuffer[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
 								}
 
-								$date3_default = $SpeicherDefaultWertePuffer["von"]; 		// Zuweisen eines Defaultwert für das Attribut "von"
-								$date4_default = $SpeicherDefaultWertePuffer["bis"]; 		// Zuweisen eines Defaultwert für von Attribut "bis"
-
-							}		 
 							
-						echo '<tr>';
-						echo 	'<form name="insert" action="lehrer.php" method="POST" >'													;
-						echo		'<td	class= "gelb" colspan="3">'																					;
-						echo 			'<input id="l_id" name="l_id" type="hidden" value="'. $SpeicherDefaultWertePuffer['l_id'] . '">'	; // Versteckte l_id	
-						echo 		'</td>'																									;
-						echo 		'<td	class= "gelb">'																					;
-						echo 			'<input type="text" name="f_name" size="6" value="' .$SpeicherDefaultWertePuffer['f_name']. '"/>'	; // Input-Field &
-						echo 		'</td>'																									; // Defaultwert
-						echo 		'<td class= "gelb">'																					;			
-
-						// Einfügen einer Kalenderklasse. Damit kann grafisch das Datum eingegeben werden.Hier für das Attribut von
-												$myCalendar = new tc_calendar("von", true, false)			;
-												$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
-												$myCalendar->setDate(date('d', strtotime($date3_default))
-													, date('m', strtotime($date3_default))
-													, date('Y', strtotime($date3_default)))					;
-												$myCalendar->setPath("calendar/")							;
-												$myCalendar->setYearInterval(2000, 2020)					;
-												$myCalendar->setAlignment('left', 'bottom')					;
-												//$myCalendar->setDatePair('date3', 'date4', $date4_default)	;
-												$myCalendar->writeScript()									;	  
-
-						echo 		'</td>'					;
-						echo 		'<td class= "gelb">'	;
-
-						// Einfügen einer Kalenderklasse. Damit kann grafisch das Datum eingegeben werden.Hier für das Attribut bis
-														$myCalendar = new tc_calendar("bis", true, false)			;
-														$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
-														$myCalendar->setDate(date('d', strtotime($date4_default))
-															, date('m', strtotime($date4_default))
-															, date('Y', strtotime($date4_default)))					;
-														$myCalendar->setPath("calendar/")							;
-														$myCalendar->setYearInterval(2000, 2020)					;
-														$myCalendar->setAlignment('left', 'bottom')					;
-														//$myCalendar->setDatePair('date3', 'date4', $date4_default)	;
-														$myCalendar->writeScript()									;	  
-														
-						echo 		'</td>'																								;
-						echo 		'<td	class= "gelb">'																				;
-						echo 			'<input type="text" name="kl_ku" size="1" value="' .$SpeicherDefaultWertePuffer['kl_ku']. '"/>' ; // Inputfield "kl_ku"
-						echo 		'</td>'																								; // & Defaultwert
-						echo 		'<td	class= "gelb" colspan="8">'																	;
-						
-						if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 5)){
-								echo 			'<button type="submit" name="action" value="0">ADD</button>	'							; 	// Einfügen des ADD
-						}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){										// ODER
-								echo 			'<button type="submit" name="action" value="3">Update</button>	'						;	// Update-Button
+							echo '<tr>'																											;
+							echo 	'<form name="insert" action="lehrer.php" method="POST" >'													;
+							echo		'<td	class= "gelb">'																		;
+								if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 8)){ 	// vormals 5
+									echo 			'<button type="submit" name="action" value="0">ADD</button>	'							; 	// Einfügen des ADD
+								}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){										// ODER
+									echo 			'<button type="submit" name="action" value="3">Update</button>	'						;	// Update-Button
+								}
+							echo 			'<input id="l_id" name="l_id" type="hidden" value="'. $SpeicherDefaultWertePuffer['l_id'] . '">'	; // Versteckt	
+							echo 		'</td>'																									;
+							echo 		'<td	class= "gelb">'																					;
+							echo 			'<input type="text" name="anrede" size="6" value="' .$SpeicherDefaultWertePuffer['anrede']. '"/>'	; // Input-Field &
+							echo 		'</td>'																									; // Defaultwert
+							echo 		'<td	class= "gelb">'																				;
+							echo 			'<input type="text" name="vname" size="1" value="' .$SpeicherDefaultWertePuffer['vname']. '"/>' ; // Inputfield "vname"
+							echo 		'</td>'																								; // & Defaultwert
+							echo 		'<td	class= "gelb">'																				;
+							echo 			'<input type="text" name="nname" size="1" value="' .$SpeicherDefaultWertePuffer['nname']. '"/>' ; // Inputfield "vname"
+							echo 		'</td>'																								;	
+							echo 		'<td	class= "gelb">'																				;
+							echo 			'<input type="text" name="telnr" size="1" value="' .$SpeicherDefaultWertePuffer['telnr']. '"/>' ; // Inputfield "vname"
+							echo 		'</td>'																								;
+							echo 	'</form>'																								;	
+							echo '</tr>'																									;
 						}
-						echo	 	'</td>'																								;
-						echo 	'</form>'																								;	
-						echo '</tr>'																									;
-					}
 
 						// 14 ---> Zeigt die Datensätze in einer Tabelle an--------------------------------------------------
 					
 						while($row=pg_fetch_assoc($result)){					// Anzeigen der Datensätze
 							echo "<tr>";
-								$counter=0;	
 								foreach ($attributeLehrer as $value)	{
 									if($value == 'l_id') {						// Zum Aufrufen andere Skripte wird die l_id benötigt
 										$lehrerID = $row[ $value ]; 
 									}
 									
-									if (($value != 'dummy01') &&($value != 'dummy02') && ($row[ $value ] == '' )&&( $counter==5)){ // Leere Felder werden rosa markiert 
-										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&l_id='.$lehrerID.'">&#x2795;</a></td>';
-										//echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&l_id='.$lehrerID.'">ADD</a></td>';
-									}elseif( $value == "dummy01"){
-										echo '<td class="hellgrau">' . '<a href="addShowSchuler.php?sort=&l_id='.$lehrerID.'">&#x1f441;</a></td>';	// Link
-										echo '<td class="hellgrau">' . '<a href="addShowSchuler.php?sort=&l_id='.$lehrerID.'">&#x2795;</a></td>'	; 	// Link
-										echo '<td class="hellgrau">' . '<a href="addShowSchuler.php?sort=&l_id='.$lehrerID.'">&#x2796;</a></td>';  	// Link
-									}elseif( $value == "dummy02"){
-										echo '<td class="grau">' . '<a href="addShowLehrer.php?sort=&l_id='.$lehrerID.'">&#x1f441;</a></td>';	// Link
-										echo '<td class="grau">' . '<a href="addShowLehrer.php?sort=&l_id='.$lehrerID.'">&#x2795;</a></td>';		// Link
-										echo '<td class="grau">' . '<a href="addShowLehrer.php?sort=&l_id='.$lehrerID.'">&#x2796;</a></td>';		// Link
-									}elseif( $value == 'l_id'){
+									if( $value == 'l_id'){
 										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&l_id='.$lehrerID.'">&#x1f441;</a></td>'; // Link
-										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&l_id='.$lehrerID.'">&#x2795;</a></td>';  // Link
-										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&l_id='.$lehrerID.'">&#x2796;</a></td>';  // Link
 									}else{
 										echo "<td>" .$row[ $value] . "</td>";
 									}
 						
 									
-									$counter++;
 								}
 								if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 6) {	// Einfügen von Radiobutton zum Selektieren 
 																								// von zu löschenden  tuple
@@ -538,6 +488,9 @@
 								}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] == 7) { 	// Einfügen von Radiobutton zum Selektieren 
 																										// von zu editierenden Tuple
 										echo '<td class="rot"><input type="radio" id="'. $lehrerID .'" name="editieren" value="'. $lehrerID .'">'	;
+								}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==8) { 	// Einfügen von Radiobutton zum Selektieren 
+																										// von zu editierenden Tuple
+										echo '<td class="rot"><input type="radio" id="'. $lehrerID .'" name="auswaehlen" value="'. $lehrerID .'">'	;
 								}
 							echo "</tr>";
 						}

@@ -1,0 +1,28 @@
+							if	(array_key_exists('action',$_POST) && $_POST["action"] 	== 2){			//Edit 
+
+								$defaultValuesEdit = pg_query($db,
+														"	SELECT 		f.f_id, f.f_name, f.von, f.bis, f.kl_ku, f.f_unterkunft 
+															FROM 		fahrt f 
+															WHERE		f.f_id=" . $_POST['editieren']. "		
+															;
+													");								// SELECT-Anfrage für die Defaultwerte der Formularelemente (Editieren)
+
+								$SpeicherDefaultWerte= [							// Array zum Speichern der Defaultwerte der Formularlemente (Editieren)
+										"f_id" 			=> ""		,
+										"f_name"		=> ""		,
+										"von"			=> ""		,
+										"bis"			=> ""		,
+										"kl_ku"			=> ""		,
+										"f_unterkunft"	=> ""		,
+									];
+
+								$row=pg_fetch_assoc($defaultValuesEdit);
+
+								foreach ($SpeicherDefaultWerte as $key => $val) { 		
+									$SpeicherDefaultWertePuffer[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
+								}
+
+								$date3_default = $SpeicherDefaultWertePuffer["von"]; 		// Zuweisen eines Defaultwert für das Attribut "von"
+								$date4_default = $SpeicherDefaultWertePuffer["bis"]; 		// Zuweisen eines Defaultwert für von Attribut "bis"
+
+							}		 
