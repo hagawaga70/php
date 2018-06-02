@@ -90,11 +90,13 @@
 				}
 				$insert = "INSERT INTO fahrt (".$attributeInsert.") VALUES (".$valuesInsert .")"	;
 				$note = pg_query($db,$insert)														;
+/*
 				echo '<pre>';
-/*				print_r($insert);*/
+				print_r($insert);
 				var_dump($_GET)		;
 				var_dump($_POST)	;
 				echo '</pre>'		;
+*/
 /*
 				if (pg_query($db,$insert)) {
 					print_r( "Data entered successfully. ");
@@ -105,6 +107,39 @@
 */
 			}
 			// 031 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+			// 032 Editieren/Ändern eines Datensatzes ------------------------------------------------------------------------
+			if(	array_key_exists('action',$_POST) && $_POST["action"] == 3){		//UPDATE
+				$attributeUpdate="";
+				$valuesUpdate="";
+				foreach ($attributeFahrt as $key => $val) {
+					if ($key == 0){
+					}elseif ($key <= 3){
+						$attributeUpdate	= $attributeUpdate.$val.							","	;			
+						$valuesUpdate 		= $valuesUpdate . "'".$_POST[$val]		."'".		","	;
+					}elseif($key==4){
+						$attributeUpdate	= $attributeUpdate.$val									;			
+						$valuesUpdate 		= $valuesUpdate . "'".$_POST[$val]		."'"			;
+					}
+				}
+
+
+
+				$update = "	UPDATE 	fahrt 
+							SET 	(".$attributeUpdate.") 
+							= 		(".$valuesUpdate .")
+							WHERE	f_id=" .$_POST['f_id']. "
+							;"	;
+				$note = pg_query($db,$update)	;
+
+				if (pg_query($db,$update)) {
+				}else {
+					print_r( "Data entry unsuccessful. ");
+					print_r(pg_last_error($db)); 
+				}
+			}
+			// 032 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 
@@ -379,7 +414,11 @@
 					if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {
 						echo '<form name="delete" action="fahrt.php" method="POST" >';
 						echo	'<fieldset>'	;
+					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {
+						echo '<form name="edit" action="fahrt.php" method="POST" >';
+						echo	'<fieldset>'	;
 					}
+
 
 					echo "<table>";
 
@@ -404,68 +443,92 @@
 							echo "</tr>";
 							// 13 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-						if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 5) {
+						if(	(array_key_exists('modus',$_GET) 	&& $_GET['modus'] 		== 5) ||		// ADD
+							(array_key_exists('action',$_POST) 	&& $_POST["action"] 	== 2)			// Edit
+						  )  {
 							define("L_LANG", "de_DE"); // Sprachauswahl für die Kalenderfuntion
 							require('calendar/tc_calendar.php');
-
-							//$date3_default = "2018-05-28";
-							//$date4_default = "2018-05-28";
-
-									 
 							
-						?>
-						<tr>
-							<form name="insert" action="fahrt.php" method="POST" >
-									<td	class= "gelb">
-									</td>					
-									<td	class= "gelb">			
-										<input type="text" name="f_name" size="6"/>					
-									</td>					
-									<td class= "gelb">
+							if	(array_key_exists('action',$_POST) && $_POST["action"] 	== 2){			//Edit 
 
-										<?php
+								$defaultValuesEdit = pg_query($db,
+														"	SELECT 		f.f_id, f.f_name, f.von, f.bis, f.kl_ku, f.f_unterkunft 
+															FROM 		fahrt f 
+															WHERE		f.f_id=" . $_POST['editieren']. "		
+															;
+													");
+
+								$SpeicherDefaultWerte= [
+										"f_id" 			=> "1"		,
+										"f_name"		=> "2"		,
+										"von"			=> "3"		,
+										"bis"			=> "4"		,
+										"kl_ku"			=> "5"		,
+										"f_unterkunft"	=> "6"		,
+									];
+
+								$row=pg_fetch_assoc($defaultValuesEdit);
+
+								foreach ($SpeicherDefaultWerte as $key => $val) {
+									$SpeicherDefaultWertePuffer[$key] = $row[$key];
+								}
+
+								$date3_default = $SpeicherDefaultWertePuffer["von"]; 
+								$date4_default = $SpeicherDefaultWertePuffer["bis"]; 
+
+							}		 
+							
+						echo '<tr>';
+						echo 	'<form name="insert" action="fahrt.php" method="POST" >'													;
+						echo		'<td	class= "gelb">'																					;
+						echo 			'<input id="f_id" name="f_id" type="hidden" value="'. $SpeicherDefaultWertePuffer['f_id'] . '">'	;	
+						echo 		'</td>'																									;
+						echo 		'<td	class= "gelb">'																					;
+						echo 			'<input type="text" name="f_name" size="6" value="' .$SpeicherDefaultWertePuffer['f_name']. '"/>'	;
+						echo 		'</td>'																									;
+						echo 		'<td class= "gelb">'																					;			
+
+
 												$myCalendar = new tc_calendar("von", true, false)			;
 												$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
 												$myCalendar->setDate(date('d', strtotime($date3_default))
 													, date('m', strtotime($date3_default))
 													, date('Y', strtotime($date3_default)))					;
 												$myCalendar->setPath("calendar/")							;
-												$myCalendar->setYearInterval(1970, 2030)					;
+												$myCalendar->setYearInterval(2000, 2020)					;
 												$myCalendar->setAlignment('left', 'bottom')					;
 												//$myCalendar->setDatePair('date3', 'date4', $date4_default)	;
 												$myCalendar->writeScript()									;	  
 
-										?>
-									</td>					
-									<td class= "gelb">
+						echo 		'</td>'					;
+						echo 		'<td class= "gelb">'	;
 
-											<?php
 														$myCalendar = new tc_calendar("bis", true, false)			;
 														$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
 														$myCalendar->setDate(date('d', strtotime($date4_default))
 															, date('m', strtotime($date4_default))
 															, date('Y', strtotime($date4_default)))					;
 														$myCalendar->setPath("calendar/")							;
-														$myCalendar->setYearInterval(1970, 2030)					;
+														$myCalendar->setYearInterval(2000, 2020)					;
 														$myCalendar->setAlignment('left', 'bottom')					;
 														//$myCalendar->setDatePair('date3', 'date4', $date4_default)	;
 														$myCalendar->writeScript()									;	  
 														
-/*														<input id="ak_id" name="modus" type="hidden" value="'.$_GET["ak_id"].'">';	*/
-											?>
-									</td>				
-				
-									<td	class= "gelb">					
-										<input type="text" name="kl_ku" size="1"/>			
-									</td>					
-									<td	class= "gelb" colspan="4">		
-										<button type="submit" name="action" value="0">ADD</button>		
-									</td>					
-							</form>
-						</tr>
-						<?php
+						echo 		'</td>'																								;
+						echo 		'<td	class= "gelb">'																				;
+						echo 			'<input type="text" name="kl_ku" size="1" value="' .$SpeicherDefaultWertePuffer['kl_ku']. '"/>'		;
+						echo 		'</td>'																								;
+						echo 		'<td	class= "gelb" colspan="4">'																	;
+						
+						if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 5)){
+								echo 			'<button type="submit" name="action" value="0">ADD</button>	'							;
+						}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){
+								echo 			'<button type="submit" name="action" value="3">Update</button>	'						;
 						}
-
+						echo	 	'</td>'																								;
+						echo 	'</form>'																								;	
+						echo '</tr>'																									;
+					}
 
 						// 14 ---> Zeigt die Datensätze in einer Tabelle an--------------------------------------------------
 					
@@ -496,9 +559,7 @@
 								}
 							echo "</tr>";
 						}
-
-						
-								// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+					// 14 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					echo "</table>"	;
 				echo '</fieldset>'	;
 			echo '</form>'			;		
