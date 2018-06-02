@@ -10,7 +10,7 @@
 
 			require("./navigationsMenue.php");			/*Der ausgelagerte Navigationsblock wird eingefügt*/
 
-			// 01---> Array mit den Attributen der Relation "Fahrt"
+			// ---> Array mit den Attributen der Relation "Fahrt" -----------------------------------------------
 			$attributeFahrt = [							
     			0	=> "f_id"		,
     			1	=> "f_name"		,
@@ -22,12 +22,12 @@
     			7	=> "dummy01"	,
     			8	=> "dummy02"	,
 			];
-			// 01<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-			// 02---> Array mit den Übersetzungen der Attribte  der Relation "Fahrt"
+			// ---> Array mit den Übersetzungen der Attribte  der Relation "Fahrt"------------------------------->
 			$spaltenBezeichnerFahrt = [
-    			"f_id" 			=> "Fahrt ID"		,
+    			"f_id" 			=> "Aktivitäten"	,
     			"f_name"		=> "Fahrtname"		,
     			"von"			=> "von"			,
     			"bis"			=> "bis"			,
@@ -37,112 +37,99 @@
     			"dummy01"		=> "Schueler"		,
     			"dummy02"		=> "Lehrer"			,
 			];
-			// 02<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 			$suchFenster = 0;  // Hat die Variable suchFenster den Wert 1 öffnet sich ein zusätzliches Suchfenster
 			
 			
-			// 03---> Datenbankanbindung  ------------------------------------------------------------------------
+			// ---> Datenbankanbindung  ------------------------------------------------------------------------
 			$db = pg_connect("host=localhost port=5432 dbname=fahraway user=parallels password=niewel");
-			// 03<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-			
-			$fehlermeldung='';
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+						
+			// ---> Löschen eines Datensatzes------------------------------------------------------------------------
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 1){
-				//$insert = "DEINTO fahrt (".$attributeInsert.") VALUES (".$valuesInsert .")"	;
+
 				$delete = "	DELETE FROM fahrt 
 							WHERE		f_id="	.	$_POST['loeschen']	.	
 							";"	;
-				$note = pg_query($db,$delete);
-/*														;
-				print_r($delete)	;
-				echo '<pre>';
-				var_dump($_GET)		;
-				var_dump($_POST)	;
-				echo '</pre>'		;
-*/
 				if (pg_query($db,$delete)) {
 				}else {
 				
-					$fehlermeldung=pg_last_error($db); 
-					print_r(pg_last_error($db)); 
+					print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
 				}
 			}			
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-			// 031 Hinzufügen eines Datensatzes ------------------------------------------------------------------------
+			// Hinzufügen eines Datensatzes ------------------------------------------------------------------------
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 0){
-				$result= pg_query($db,"SELECT nextval ('fahrtSeq')");
-				while($row=pg_fetch_assoc($result)){
-					$fahrtSequenceNr = $row['nextval'];
-				}
-				$attributeInsert="";
-				$valuesInsert="";
+
+				$result= pg_query($db,"SELECT nextval ('fahrtSeq')");   // Eine neue ID für den Datensatz wird geliefert
+				while($row=pg_fetch_assoc($result)){					// |
+					$fahrtSequenceNr = $row['nextval'];					// |
+				}														// |
+
+
+				$attributeInsert="";	//  Die Attribute für das INSERT-Statement werden hier abgespeichert
+				$valuesInsert="";		//  Die Werte der einzelnen Attribute werden hier abgespeichert
 				foreach ($attributeFahrt as $key => $val) {
 					if ($key == 0){
-						$attributeInsert	= $attributeInsert .$val .							","	;			
-						$valuesInsert 		= $valuesInsert .	$fahrtSequenceNr .				","	;
+						$attributeInsert	= $attributeInsert .$val .							","	;  	// ...., attribute1, attribute2, ...			
+						$valuesInsert 		= $valuesInsert .	$fahrtSequenceNr .				","	;	// Anhängen der Werte: Hier die neue ID	
 					}elseif ($key <= 3){
-						$attributeInsert	= $attributeInsert.$val.							","	;			
-						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'".		","	;
+						$attributeInsert	= $attributeInsert.$val.							","	;	// Anhängen mit , als Separationszeichen
+						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'".		","	;   // | 
 					}elseif($key==4){
-						$attributeInsert	= $attributeInsert.$val									;			
-						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'"			;
+						$attributeInsert	= $attributeInsert.$val									;	// Letztes/r Attribut/Wert daher ohne Komma	
+						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'"			;   // anhängen
 					}
 				}
-				$insert = "INSERT INTO fahrt (".$attributeInsert.") VALUES (".$valuesInsert .")"	;
-				$note = pg_query($db,$insert)														;
-/*
-				echo '<pre>';
-				print_r($insert);
-				var_dump($_GET)		;
-				var_dump($_POST)	;
-				echo '</pre>'		;
-*/
-/*
-				if (pg_query($db,$insert)) {
-					print_r( "Data entered successfully. ");
+				$insert = "INSERT INTO fahrt (".$attributeInsert.") VALUES (".$valuesInsert .")"	;	// Erstellen des gesamten INSERT-Statement
+
+				if (pg_query($db,$insert)) {					// Ausführten des INSERT-Statements 
 				}else {
-					print_r( "Data entry unsuccessful. ");
-					print_r(pg_last_error($db)); 
+					print_r( "Data entry unsuccessful. ")	;	// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
+					print_r(pg_last_error($db))				;   // |
 				}
-*/
 			}
-			// 031 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 			// 032 Editieren/Ändern eines Datensatzes ------------------------------------------------------------------------
-			if(	array_key_exists('action',$_POST) && $_POST["action"] == 3){		//UPDATE
-				$attributeUpdate="";
-				$valuesUpdate="";
+			if(	array_key_exists('action',$_POST) && $_POST["action"] == 3){		//	Ändern eines Datensatzes
+				$attributeUpdate=""	;												// Attribut-Zeichenkette für das Update-Statement
+				$valuesUpdate=""	;												// Value-Zeichenkette für das Update-Statement					
 				foreach ($attributeFahrt as $key => $val) {
-					if ($key == 0){
+					if ($key == 0){													// Bei key == 0 keine Einträge, das die ID nicht verändert wird
 					}elseif ($key <= 3){
-						$attributeUpdate	= $attributeUpdate.$val.							","	;			
-						$valuesUpdate 		= $valuesUpdate . "'".$_POST[$val]		."'".		","	;
+						$attributeUpdate	= $attributeUpdate.$val.							","	;	// Attribte  kommasepariert		
+						$valuesUpdate 		= $valuesUpdate . "'".$_POST[$val]		."'".		","	;	// Values kommasepariert
 					}elseif($key==4){
-						$attributeUpdate	= $attributeUpdate.$val									;			
-						$valuesUpdate 		= $valuesUpdate . "'".$_POST[$val]		."'"			;
+						$attributeUpdate	= $attributeUpdate.$val									;	// Letztes/r Attribute/Value ohne Komma		
+						$valuesUpdate 		= $valuesUpdate . "'".$_POST[$val]		."'"			;	// |
 					}
 				}
 
 
 
-				$update = "	UPDATE 	fahrt 
+				$update = "	UPDATE 	fahrt 									
 							SET 	(".$attributeUpdate.") 
 							= 		(".$valuesUpdate .")
 							WHERE	f_id=" .$_POST['f_id']. "
-							;"	;
-				$note = pg_query($db,$update)	;
+							;"	;											// Zusammenstellen des Update-Statement	
+				$note = pg_query($db,$update)	;							// Ausführen des UPDATE-Statement	
 
 				if (pg_query($db,$update)) {
 				}else {
-					print_r( "Data entry unsuccessful. ");
-					print_r(pg_last_error($db)); 
+					print_r( "Data entry unsuccessful. ");					// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
+					print_r(pg_last_error($db)); 							// |
 				}
 			}
-			// 032 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-
+			//ACHTUNG: Hier wird nur ein Datensatz geliefert, auch wenn der Schüler an mehreren Fahrten teilgenommen hat
 
 			if(	!array_key_exists('select',$_GET) ){
 				$where = "";
@@ -150,7 +137,7 @@
 				$where = "WHERE f.f_id =".$_GET['f_id'];
 			}
 
-			// 04 --->  Verhinderung von Fehlermeldungen ---------------------------------------------------------
+			// --->  Verhinderung von Fehlermeldungen ---------------------------------------------------------
 
 			if(array_key_exists('sort',$_GET)){
 				$schalter = $_GET['sort'];
@@ -158,28 +145,28 @@
 				$schalter="";
 			}
 
-			// 04 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			
-			// 05 ---> Erweiterung der SELECT-Anweisung: Abhängig vom Modus -------------------------------------
+			// ---> Erweiterung der SELECT-Anweisung: Abhängig vom Modus -------------------------------------
 			
 			if 		($_GET['modus'] == 1){					// Zeige alle Datensätze
 
-				$where = '';
+				$where = '';								// -- kein WHERE-Clause 	
 
 			}elseif ($_GET['modus'] == 2){					// Öffne Suchfenster und zeige alle Datensäte
 
-				$suchfenster = 1;	
-				$where = '';
+				$suchfenster 	= 1		;					// 1 -> Suchfenster wird geöffnet
+				$where 			= ''	;					// -- kein WHERE-Clause 	
 				
 			}elseif ($_GET['modus'] == 3){					// Öffne Suchfenster und zeigt die selektierten Datensätze
 
-				$suchfenster = 1									;
-				if (is_numeric($_POST["f_id_input"])){
-					$f_id = $_POST["f_id_input"]					;
+				$suchfenster = 1										;	// 1 -> Suchfenster wird geöffnet
+				if (is_numeric($_POST["f_id_input"])){						// Anführungsstriche werden entfernt
+					$f_id = $_POST["f_id_input"]						;	// ???
 				}else{
-					$f_id = $_POST["f_id"]							;
+					$f_id = $_POST["f_id"]								;
 				}
-				$where = 'WHERE f_id'.$_POST["f_id_operator"] . $f_id;
+				$where = 'WHERE f_id'.$_POST["f_id_operator"] . $f_id	;	// Erstellen des WHERE-Clause -> WHERE f_id [>|>=|= usw]
 				
 				
 			}elseif ($_GET['modus'] == 4){					//	Das Skript fahrt.php wurde vom Skript aktivitaeten au
@@ -191,27 +178,26 @@
 											SELECT 		f_id 
 											FROM 		wirdangeboten 
 											WHERE		ak_id ='. $_GET["ak_id"].'
-										)';
-				echo '<input id="ak_id" name="ak_id" type="hidden" value="'.$_GET["ak_id"].'">';	
+										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+				echo '<input id="ak_id" name="ak_id" type="hidden" value="'.$_GET["ak_id"].'">';	// Die ak_id wird versteckt per GET weitergegeben
 				
-			}elseif ($_GET['modus'] == 5){				
+			}elseif ($_GET['modus'] == 5){					// Hinzufügen eines Datensatzes			
 
-				$suchfenster = 0	;
-				$where = ''			;
-				
+				$suchfenster = 0	;						// Es wird kein Suchfenster geöffnet
+				$where = ''			;						// Alle Datensätze werden angezeigt
 			}
 
 
 
 			
 
-			// 05 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 
-			// 06 ---> Sortiert die Datensätze abhängig vom Attribut aufsteigend -------------------------------
+			// Sortiert die Datensätze abhängig vom Attribut aufsteigend -------------------------------
 			switch ($schalter) {
-				case "f_id":
+				case "f_id":					// Sortiert nach f_id
 					$result = pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
@@ -222,7 +208,7 @@
 												ORDER BY			f.f_id;
 								");
 					break;
-				case "f_name":
+				case "f_name":					// Sortiert nach f_name
 					$result = pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
@@ -233,7 +219,7 @@
 												ORDER BY			f.f_name;
 								");
 					break;
-				case "von":
+				case "von":					 	// Sortiert nach von
 					$result = pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
@@ -244,7 +230,7 @@
 												ORDER BY			f.von;
 								");
 					break;
-				case "bis":
+				case "bis":						// Sortiert nach bis
 					$result = pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
@@ -255,7 +241,7 @@
 												ORDER BY			f.bis;
 								");
 					break;
-				case "kl_ku":
+				case "kl_ku":					// Sortiert nach kl_ku
 					$result = 	pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
@@ -266,7 +252,7 @@
 												ORDER BY			f.kl_ku;
 								");
 					break;
-				case "f_unterkunft":
+				case "f_unterkunft":			// Sortiert nach f_unterkunft
 					$result = 	pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
@@ -277,7 +263,7 @@
 												ORDER BY			u.u_name;
 								");
 					break;
-				case "o_name":
+				case "o_name":					// Sortiert nach o_name
 					$result = 	pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name ,o.o_name
 												FROM 				fahrt f 
@@ -289,7 +275,7 @@
 								");
 					break;
 
-				default:
+				default:					// Standardabfrage mit keinem oder unterschiedlichem WHERE-Clause
 					$result = pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name,o.o_name
 												FROM 				fahrt f 
@@ -301,13 +287,14 @@
 												;
 								");
 			}
-			// 06 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-			if ($suchfenster == 1){   // Der Link "suche" im Menue "Fahrten" wurde angeklickt
+			if ($suchfenster == 1){   // Der Link "suche/Search" im Menue "Fahrten" wurde angeklickt
 
 
-				// 07 ---> Zunächste werden alle Datensätze angezeigt
+				// ---> Zunächste werden alle Datensätze angezeigt -----------------------------------------------
+
 				$formSelect = pg_query($db,
 											"	SELECT 				f.f_id, f.f_name, f.von, f.bis,f.kl_ku, u.u_name, o.o_name 
 												FROM 				fahrt f 
@@ -321,25 +308,25 @@
 	
 
 
-				$index=0;
+				$index=0;				// Zählt die Anzahl der Datensätze 
 
-				// 08 ---> Erstellen eines Arrays mit den f_id's . Die ID's werden für das Select-Menü benötigt
+				// ---> Erstellen eines Arrays mit den f_id's . Die ID's werden für das Select-Menü benötigt
 
 				while($row=pg_fetch_assoc($formSelect)){
 					$fahrtID[$index] = $row[$attributeFahrt[0]]		;
 					$index++										;
 				}
-				// 08 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-				$operator[0]=">"	;
-				$operator[1]=">="	;
-				$operator[2]="="	;
-				$operator[3]="<="	;
-				$operator[4]="<"	;
+				$operator[0]=">"	;		// Array mit unterschiedlichen Operatoren für das Suchabfrage
+				$operator[1]=">="	;		// |
+				$operator[2]="="	;		// |
+				$operator[3]="<="	;		// |
+				$operator[4]="<"	;		// |
 
 
-				$verknuepfung[0] ="AND";
-				$verknuepfung[1] ="OR";
+				$verknuepfung[0] ="AND";	// Array mit unterschiedlichen Verknüpfungen unterschiedlicher Suchanfrage (NICHT UMGESETZT)
+				$verknuepfung[1] ="OR";		// |
 
 				asort($fahrtID);	// Sortierung der ID's
 
@@ -377,19 +364,22 @@
 				}
 				
 				echo '			</select>'																;
-				// 10 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-				// 11 ---> Manuelle Eingabe der gesuchten f_id --------------------------------------------------
+				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+				// ---> Manuelle Eingabe der gesuchten f_id --------------------------------------------------
 				if (array_key_exists('f_id_input',$_POST) && $_POST['f_id_input'] != ''){
 					echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5" value='.$_POST['f_id_input'].'>'	; // Voreinstellung s.o	
 				}else{
 					echo '			<input id="f_id_input" name="f_id_input" maxlength="5" size="5" >'									;	
 				}
-				// 11 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 	
-				// 12 ---> Auswahlmenü Verknüpfungsart -----------------------------------------------------------
+				// ---> Auswahlmenü Verknüpfungsart -----------------------------------------------------------
 				echo			'<select name="f_id_verknuepfung">'												;
 				echo '				<option>---				</option>'											;
 				foreach ($verknuepfung as $key => $val) {	
@@ -401,9 +391,9 @@
 				}
 
 				echo '			</select>'																		;
-				// 12 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				echo '		</label>'																	;
-				echo '		<button type="submit" name="action" value="0">Suche</button>'				;
+				echo '		<button type="submit" name="action" value="5">Suche</button>'				;
 				echo '	</form>'																		;
 				echo '</div>'																			;		
 			}
@@ -411,12 +401,12 @@
 
 			echo'	<div id="rahmen_3">';
 			
-					if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {
-						echo '<form name="delete" action="fahrt.php" method="POST" >';
-						echo	'<fieldset>'	;
-					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {
-						echo '<form name="edit" action="fahrt.php" method="POST" >';
-						echo	'<fieldset>'	;
+					if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {				// Der Delete-Button wird angehängt
+						echo '<form name="delete" action="fahrt.php" method="POST" >'	;		// Das fieldset wird für die Radio-Button benötigt
+						echo	'<fieldset>'											;
+					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {		// Der Edit-Button wird angehängt
+						echo '<form name="edit" action="fahrt.php" method="POST" >'		;
+						echo	'<fieldset>'											; 		// Das fieldset wird für den Edit-Button benötigt
 					}
 
 
@@ -425,19 +415,19 @@
 							// 13 ---> Spaltenkopf/ -bezeichner -----------------------------------------------------------
 							echo "<tr>";
 
-								foreach ($spaltenBezeichnerFahrt as $key => $value)	{
-									if(array_key_exists('select',$_GET) && $_GET['select']==1){
-										echo '<th class="grau">'. $value ."</th>";
-									}elseif(array_key_exists('modus',$_GET) && $_GET['modus']==4){
-										echo '<th class="grau">'. $value ."</th>";
-									}else{
-										echo '<th class="grau">' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";
+								foreach ($spaltenBezeichnerFahrt as $key => $value)	{					// Spaltenkopfbezeichner mit und ohne Link
+									if(array_key_exists('select',$_GET) && $_GET['select']==1){			// zum Sortieren der Datensätze
+										echo '<th class="grau">'. $value ."</th>";						// |
+									}elseif(array_key_exists('modus',$_GET) && $_GET['modus']==4){		// |
+										echo '<th class="grau">'. $value ."</th>";						// |
+									}else{																// |
+										echo '<th class="grau">' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";	// |
 									}
 								}
 							
-							if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {
+							if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {				// Anfügen des Delete-Button
 								echo '<td class="rot"><button type="submit" name="action" value="1">DELETE</button></td>'	;
-							}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {
+							}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {		// Anfügen des Edit-Button
 								echo '<td class="rot"><button type="submit" name="action" value="2">EDIT</button></td>'	;
 							}		
 							echo "</tr>";
@@ -456,39 +446,39 @@
 															FROM 		fahrt f 
 															WHERE		f.f_id=" . $_POST['editieren']. "		
 															;
-													");
+													");								// SELECT-Anfrage für die Defaultwerte der Formularelemente (Editieren)
 
-								$SpeicherDefaultWerte= [
-										"f_id" 			=> "1"		,
-										"f_name"		=> "2"		,
-										"von"			=> "3"		,
-										"bis"			=> "4"		,
-										"kl_ku"			=> "5"		,
-										"f_unterkunft"	=> "6"		,
+								$SpeicherDefaultWerte= [							// Array zum Speichern der Defaultwerte der Formularlemente (Editieren)
+										"f_id" 			=> ""		,
+										"f_name"		=> ""		,
+										"von"			=> ""		,
+										"bis"			=> ""		,
+										"kl_ku"			=> ""		,
+										"f_unterkunft"	=> ""		,
 									];
 
 								$row=pg_fetch_assoc($defaultValuesEdit);
 
-								foreach ($SpeicherDefaultWerte as $key => $val) {
-									$SpeicherDefaultWertePuffer[$key] = $row[$key];
+								foreach ($SpeicherDefaultWerte as $key => $val) { 		
+									$SpeicherDefaultWertePuffer[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
 								}
 
-								$date3_default = $SpeicherDefaultWertePuffer["von"]; 
-								$date4_default = $SpeicherDefaultWertePuffer["bis"]; 
+								$date3_default = $SpeicherDefaultWertePuffer["von"]; 		// Zuweisen eines Defaultwert für das Attribut "von"
+								$date4_default = $SpeicherDefaultWertePuffer["bis"]; 		// Zuweisen eines Defaultwert für von Attribut "bis"
 
 							}		 
 							
 						echo '<tr>';
 						echo 	'<form name="insert" action="fahrt.php" method="POST" >'													;
 						echo		'<td	class= "gelb">'																					;
-						echo 			'<input id="f_id" name="f_id" type="hidden" value="'. $SpeicherDefaultWertePuffer['f_id'] . '">'	;	
+						echo 			'<input id="f_id" name="f_id" type="hidden" value="'. $SpeicherDefaultWertePuffer['f_id'] . '">'	; // Versteckte f_id	
 						echo 		'</td>'																									;
 						echo 		'<td	class= "gelb">'																					;
-						echo 			'<input type="text" name="f_name" size="6" value="' .$SpeicherDefaultWertePuffer['f_name']. '"/>'	;
-						echo 		'</td>'																									;
+						echo 			'<input type="text" name="f_name" size="6" value="' .$SpeicherDefaultWertePuffer['f_name']. '"/>'	; // Input-Field &
+						echo 		'</td>'																									; // Defaultwert
 						echo 		'<td class= "gelb">'																					;			
 
-
+						// Einfügen einer Kalenderklasse. Damit kann grafisch das Datum eingegeben werden.Hier für das Attribut von
 												$myCalendar = new tc_calendar("von", true, false)			;
 												$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
 												$myCalendar->setDate(date('d', strtotime($date3_default))
@@ -503,6 +493,7 @@
 						echo 		'</td>'					;
 						echo 		'<td class= "gelb">'	;
 
+						// Einfügen einer Kalenderklasse. Damit kann grafisch das Datum eingegeben werden.Hier für das Attribut bis
 														$myCalendar = new tc_calendar("bis", true, false)			;
 														$myCalendar->setIcon("calendar/images/iconCalendar.gif")	;
 														$myCalendar->setDate(date('d', strtotime($date4_default))
@@ -516,14 +507,14 @@
 														
 						echo 		'</td>'																								;
 						echo 		'<td	class= "gelb">'																				;
-						echo 			'<input type="text" name="kl_ku" size="1" value="' .$SpeicherDefaultWertePuffer['kl_ku']. '"/>'		;
-						echo 		'</td>'																								;
+						echo 			'<input type="text" name="kl_ku" size="1" value="' .$SpeicherDefaultWertePuffer['kl_ku']. '"/>' ; // Inputfield "kl_ku"
+						echo 		'</td>'																								; // & Defaultwert
 						echo 		'<td	class= "gelb" colspan="4">'																	;
 						
 						if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 5)){
-								echo 			'<button type="submit" name="action" value="0">ADD</button>	'							;
-						}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){
-								echo 			'<button type="submit" name="action" value="3">Update</button>	'						;
+								echo 			'<button type="submit" name="action" value="0">ADD</button>	'							; 	// Einfügen des ADD
+						}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){										// ODER
+								echo 			'<button type="submit" name="action" value="3">Update</button>	'						;	// Update-Button
 						}
 						echo	 	'</td>'																								;
 						echo 	'</form>'																								;	
@@ -532,19 +523,23 @@
 
 						// 14 ---> Zeigt die Datensätze in einer Tabelle an--------------------------------------------------
 					
-						while($row=pg_fetch_assoc($result)){
+						while($row=pg_fetch_assoc($result)){					// Anzeigen der Datensätze
 							echo "<tr>";
 								$counter=0;	
 								foreach ($attributeFahrt as $value)	{
-									if($value == 'f_id') {
+									if($value == 'f_id') {						// Zum Aufrufen andere Skripte wird die f_id benötigt
 										$fahrtID = $row[ $value ]; 
 									}
+									
 									if (($row[ $value ] == '' )&&( $counter==5)){ 		// Leere Felder werden rosa markiert 
-										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">FÜGE HINZU</a></td>';
+										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">&#x2795;</a></td>';
+										//echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">ADD</a></td>';
 									}elseif( $value == "dummy01"){
-										echo '<td>' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">Show/Add</a></td>';
+										echo '<td>' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">Show/Add</a></td>';		// Einfügen eines Links
 									}elseif( $value == "dummy02"){
-										echo '<td>' . '<a href="addShowLehrer.php?sort=&f_id='.$fahrtID.'">Show/Add</a></td>';
+										echo '<td>' . '<a href="addShowLehrer.php?sort=&f_id='.$fahrtID.'">Show/Add</a></td>';		// Einfügen eines Links
+									}elseif( $value == 'f_id'){
+										echo '<td>' . '<a href="unterkunft.php?modus=1&f_id='.$fahrtID.'">Show/Add/Delete</a></td>'; // Einfügen eines Links
 									}else{
 										echo "<td>" .$row[ $value] . "</td>";
 									}
@@ -552,9 +547,11 @@
 									
 									$counter++;
 								}
-								if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 6) {
+								if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 6) {	// Einfügen von Radiobutton zum Selektieren 
+																								// von zu löschenden  tuple
 										echo '<td class="rot"><input type="radio" id="'. $fahrtID .'" name="loeschen" value="'. $fahrtID .'">'	;
-								}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] == 7) {
+								}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] == 7) { 	// Einfügen von Radiobutton zum Selektieren 
+																										// von zu editierenden Tuple
 										echo '<td class="rot"><input type="radio" id="'. $fahrtID .'" name="editieren" value="'. $fahrtID .'">'	;
 								}
 							echo "</tr>";
