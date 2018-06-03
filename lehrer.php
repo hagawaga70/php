@@ -31,7 +31,7 @@
 			// .POST action 9	B)  Ein neuer Lehrerdatensatz wird angelegt. Die l_id und die f_id werden in der Relation begleitet abgespeichert
 			// --------------------------------------------------------------------------------------------------------------------------------------
 			//  DELETE
-			// .GET  modus  9   	lehrer.php wird fahrt.php aufgerufen. 
+			// .GET  modus  9   	lehrer.php wird von fahrt.php aufgerufen. 
 			// .POST action 1   	Entfernen eines Datensatzes
 			// --------------------------------------------------------------------------------------------------------------------------------------
 
@@ -59,7 +59,6 @@
 			];
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-			$suchFenster = 0;  // Hat die Variable suchFenster den Wert 1 öffnet sich ein zusätzliches Suchfenster
 			
 			
 			// ---> Datenbankanbindung  ------------------------------------------------------------------------
@@ -337,7 +336,13 @@
 											WHERE		f_id ='. $_GET["f_id"].'
 										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 				
+			// ACTION 2 DELETE --------------------------------------------------------------------------------------------------------------------------
+			}elseif ($_POST['action'] == 2){				
+
+				$suchfenster = 0									;
+				$where = 'WHERE l.l_id != '. $_POST["editieren"];   // Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 			}
+
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -437,7 +442,10 @@
 										</td>'	;
 							}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7 ||
 										array_key_exists('modus',$_GET) && $_GET['modus'] ==4 ) {		// Anfügen des Edit-Button
-								echo '<td class="rot"><button type="submit" name="action" value="2">EDIT</button></td>'	;
+								echo '<td class="rot">
+												<button type="submit" name="action" value="2">EDIT</button>
+										</td>'	;
+
 							}elseif(		array_key_exists('modus',$_GET) && $_GET['modus'] ==8) {		// Anfügen des Edit-Button
 								echo '<td class="rot"><button type="submit" name="action" value="8">SELECT</button></td>'	;
 							}		
@@ -456,7 +464,6 @@
 										"telnr"			=> ""		,
 									];
 								if( array_key_exists('action',$_POST) 	&& $_POST["action"] == 2){			// Edit
-									print_r($SpeicherDefaultWerte  );
 									$defaultValuesEdit = pg_query($db,
 															"	SELECT 		l.l_id, l.anrede, l.vname, l.nname, l.telnr
 																FROM 		lehrer l 
@@ -505,8 +512,6 @@
 							echo 		'<td	class= "gelb">'																				;
 							echo 			'<input type="text" name="telnr" size="15" value="' .$SpeicherDefaultWertePuffer['telnr']. '"/>' ; // Inputfield "vname"
 							echo 		'</td>'																								;
-							echo 		'<td	class= "gelb">'																				;
-							echo 		'</td>'																								;	
 							echo 	'</form>'																								;	
 							echo '</tr>'																									;
 						}
@@ -516,12 +521,12 @@
 						while($row=pg_fetch_assoc($result)){					// Anzeigen der Datensätze
 							echo "<tr>";
 								foreach ($attributeLehrer as $value)	{
-									if($value == 'l_id') {						// Zum Aufrufen andere Skripte wird die l_id benötigt
+									if($value == 'l_id') {						// Zum Aufrufen anderer Skripte wird die l_id benötigt
 										$lehrerID = $row[ $value ]; 
 									}
 									
 									if( $value == 'l_id'){
-										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&l_id='.$lehrerID.'">&#x1f441;</a></td>'; // Link
+										echo '<td class="hellgrau">' . '<a href="fahrt.php?modus=10&l_id='.$lehrerID.'">&#x1f441;</a></td>'; // Link
 									}else{
 										echo "<td>" .$row[ $value] . "</td>";
 									}

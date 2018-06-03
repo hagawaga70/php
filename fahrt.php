@@ -8,15 +8,20 @@
 	<body>
 		<?php
 					
-			// POST action 1   Entfernen eines Datensatzes
-			// POST action 0   Hinzufügen eines Datensatzes
-			// GET  modus	5	Hinzufügen eines Datensatzes
+			// POST action 1   	Entfernen eines Datensatzes
+			// GET  modus  6  	Entfernen eines Datensatzes
+			// -----------------------------------------------------------------------------------------------------------------------------------------
+			// POST action 0   	Hinzufügen eines Datensatzes
 			// POST action 3	Editieren eines Datensatzes
 			// GET  modus  1 	Zeige alle Datensätze
 			// GET  modus  2 	Öffnet das Suchfenster und zeigt  alle Datensätze
 			// GET  modus  3 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze
 			// POST action 5 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  // action und der Wert 5 werden nirgends weiter abgefragt
-			// GET  modus  4   fahrt.php wird von aktivitaeten aufgerufen und zeigt alle Fahrten zu einer bestimmten Aktivität an 	
+			// GET  modus  4   	fahrt.php wird von aktivitaeten aufgerufen und zeigt alle Fahrten zu einer bestimmten Aktivität an 	
+			// GET  modus  5  	Hinzufügen eines Datensatz 
+			// -----------------------------------------------------------------------------------------------------------------------------------------
+			// GET  modus  10 	Aufruf von lehrer.php. Anzeige von Datensätzen die zu einer bestimmten LehrerID gehören 
+
 
 
 			require("./navigationsMenue.php");			/*Der ausgelagerte Navigationsblock wird eingefügt*/
@@ -196,6 +201,18 @@
 
 				$suchfenster = 0	;						// Es wird kein Suchfenster geöffnet
 				$where = ''			;						// Alle Datensätze werden angezeigt
+
+
+			// ---> Das fahrt.php wird von lehrer.php aufgerufen. lehrer.php übergibt eine lehrerID. Alle Fahrten zur LehrerID werden angezeigt
+			}elseif ($_GET['modus'] == 10){					
+															
+				$suchfenster = 0									;
+				$where = 'WHERE f.f_id IN (
+											SELECT 		f_id 
+											FROM 		begleitet	
+											WHERE		l_id ='. $_GET["l_id"].'
+										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+				
 			}
 
 
