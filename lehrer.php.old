@@ -8,8 +8,10 @@
 	<body>
 		<?php
 
-			// GET  modus	1 2 3 4 5 8 9
-			// POST action  0 1 3 5   8 9
+			// GET  modus	1 2 3 4 5 8
+			// POST action  0 1 3 5   8
+			// ------------------------------------------------------
+			// POST action 1   	Entfernen eines Datensatzes
 			// ------------------------------------------------------
 			// POST action 0  	Hinzufügen eines Datensatzes
 			// GET  modus  5	Hinzufügen eines Datensatzes
@@ -17,23 +19,18 @@
 			// POST action 3	Editieren eines Datensatzes
 			// ------------------------------------------------------
 			// GET  modus  1 	Zeige alle Datensätze
-			// --------------------------------------------------------------------------------------------------------------------------------------
+			// ------------------------------------------------------
 			// GET  modus  2 	Öffnet das Suchfenster und zeigt  alle Datensätze
-			// --------------------------------------------------------------------------------------------------------------------------------------
+			// ------------------------------------------------------
 			// GET  modus  3 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze
 			// POST action 5 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  // action und der Wert 5 werden nirgends weiter abgefragt
-			// --------------------------------------------------------------------------------------------------------------------------------------
-			// GET  modus  4   	lehrer.php wird von fahrt.php aufgerufen und zeigt alle Lehrer, die an einer bestimmten Fahrt teilnehmen 	
-			// --------------------------------------------------------------------------------------------------------------------------------------
-			//  MAP 
-			// .GET  modus  8   	lehrer.php wird fahrt.php aufgerufen. 
-			// .POST action 8	A)	Ein bestehender Lehrerdatensatz (l_id) wird mit der f_id in der Relation begleitet eingetragen
-			// .POST action 9	B)  Ein neuer Lehrerdatensatz wird angelegt. Die l_id und die f_id werden in der Relation begleitet abgespeichert
-			// --------------------------------------------------------------------------------------------------------------------------------------
-			//  DELETE
-			// .GET  modus  9   	lehrer.php wird fahrt.php aufgerufen. 
-			// .POST action 1   	Entfernen eines Datensatzes
-			// --------------------------------------------------------------------------------------------------------------------------------------
+			// ------------------------------------------------------
+			// GET  modus  4   	lehrer.php wird von aktivitaeten aufgerufen und zeigt alle Lehreren zu einer bestimmten Aktivität an 	
+			// ------------------------------------------------------
+			// POST action
+			// GET  modus  8   	lehrer.php wird fahrt.php aufgerufen. 
+			//					A)	Ein bestehender Lehrerdatensatz (l_id) wird mit der f_id in der Relation begleitet eingetragen
+			//					B)  Ein neuer Lehrerdatensatz wird angelegt. Die l_id und die f_id werden in der Relation begleitet abgespeichert
 
 
 			require("./navigationsMenue.php");			/*Der ausgelagerte Navigationsblock wird eingefügt*/
@@ -68,123 +65,19 @@
 
 
 						
-			// ---> Hinzufügen eines Datensatzes und Eintrag in die Relation "begleitet"---------------------------------------------------------------
-			if(	array_key_exists('action',$_POST) && $_POST["action"] == 9){
+			// ---> Löschen eines Datensatzes------------------------------------------------------------------------
+			if(	array_key_exists('action',$_POST) && $_POST["action"] == 1){
 
-				$result= pg_query($db,"SELECT nextval ('lehrerSeq')");   	// Eine neue ID für den Datensatz wird geliefert
-				while($row=pg_fetch_assoc($result)){						// |
-					$lehrerSequenceNr = $row['nextval'];					// |
-				}
-
-				$mapping =
-
-						"WITH data (f_id, l_id,anrede,vname,nname,telnr) 
-						AS (
-								VALUES (".$_POST["f_id"].",".$lehrerSequenceNr .",'".$_POST["anrede"]."','".$_POST["vname"]."','".$_POST["nname"]."',".$_POST["telnr"].")
-						), 
-						ins1 AS (
-							INSERT INTO lehrer (l_id,anrede,vname,nname,telnr)
-							SELECT l_id,anrede,vname,nname,telnr FROM data
-							ON CONFLICT DO NOTHING
-							Returning l_id
-						)
-							INSERT INTO begleitet (l_id,f_id)
-							SELECT 	l_id, f_id
-							FROM 	data
-							JOIN ins1 USING (l_id);";
-
-				if (pg_query($db,$mapping)) {
+				$delete = "	DELETE FROM lehrer 
+							WHERE		l_id="	.	$_POST['loeschen']	.	
+							";"	;
+				if (pg_query($db,$delete)) {
 				}else {
 				
 					print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-					print_r($mapping);				//Eine Fehlermeldung wird im Browser angezeigt 
 				}
 			}			
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-			// --> Löchen einer Verbindung (Relation: begleitet) zwischen einer Fahrt(Relation: fahrt) und einem Lehrer (Relation:Lehrer)
-			if(	array_key_exists('action',$_POST) && $_POST["action"] == 1){
-
-					$errorSwitch=true;	
-
-					if (pg_query($db,"BEGIN TRANSACTION;")) {
-					}else {
-					
-						print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-						print_r($mapping);							//Eine Fehlermeldung wird im Browser angezeigt 
-						$errorSwitch = false;
-					}
-				
-					$deleteBegleitet = 	" 	DELETE FROM begleitet
-											WHERE		f_id = " .$_POST['f_id']. "
-											AND			l_id = " .$_POST['loeschen']. ";"
-										;
-
-
-					if ($errorSwitch && pg_query($db,$deleteBegleitet)) {
-					}else {
-					
-						print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-						print_r($deleteBegleitet );					//Eine Fehlermeldung wird im Browser angezeigt 
-						$errorSwitch = false;
-					}
-
-
-					$deleteLehrer = "	DELETE FROM lehrer 
-										WHERE	l_id=".$_POST['loeschen']."
-										AND		0 = (	SELECT 	count(*) 
-														FROM	begleitet
-														WHERE	l_id = ".$_POST['loeschen']."); "
-									;
-
-
-
-					if ($errorSwitch && pg_query($db,$deleteLehrer)) {
-
-						if (pg_query($db,"COMMIT;")) {
-						}else {
-					
-							print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-							print_r($deleteLehrer );					//Eine Fehlermeldung wird im Browser angezeigt 
-
-							if (pg_query($db,"ROllBACK;")) {
-							}else {
-					
-								print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-							}
-						}
-					}else{
-						if (pg_query($db,"ROllBACK;")) {
-						}else {
-							print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-						}
-					}
-						
-			}	
-
-			// ---> Verbindet eine Fahrt mit einem bestehenden Datensatz der Relation lehrer---------------------
-			if(	array_key_exists('action',$_POST) && $_POST["action"] == 8){
-
-				$insert = "INSERT INTO begleitet (l_id,f_id) VALUES (".$_POST['auswaehlen'].",".$_POST['f_id'].")"	;	// Erstellen des gesamten INSERT-Statement
-
-				if (pg_query($db,$insert)) {					// Ausführten des INSERT-Statements 
-				}else {
-					print_r( "Data entry unsuccessful. ")	;	// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
-					print_r(pg_last_error($db))				;   // |
-				}
-			}			
-			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-
-
-
-
-
-
-
-
 
 			// Hinzufügen eines Datensatzes ------------------------------------------------------------------------
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 0){
@@ -272,18 +165,16 @@
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			
 			// ---> Erweiterung der SELECT-Anweisung: Abhängig vom Modus -------------------------------------
-			// MODUS 1 --------------------------------------------------------------------------------------------------------------------------------
+			
 			if 		($_GET['modus'] == 1){					// Zeige alle Datensätze
 
 				$where = '';								// -- kein WHERE-Clause 	
 
-			// MODUS 2 --------------------------------------------------------------------------------------------------------------------------------
 			}elseif ($_GET['modus'] == 2){					// Öffne Suchfenster und zeige alle Datensäte
 
 				$suchfenster 	= 1		;					// 1 -> Suchfenster wird geöffnet
 				$where 			= ''	;					// -- kein WHERE-Clause 	
 				
-			// MODUS 3 --------------------------------------------------------------------------------------------------------------------------------
 			}elseif ($_GET['modus'] == 3){					// Öffne Suchfenster und zeigt die selektierten Datensätze
 
 				$suchfenster = 1										;	// 1 -> Suchfenster wird geöffnet
@@ -295,49 +186,28 @@
 				$where = 'WHERE l_id'.$_POST["l_id_operator"] . $l_id	;	// Erstellen des WHERE-Clause -> WHERE l_id [>|>=|= usw]
 				
 				
-			// MODUS 4 --------------------------------------------------------------------------------------------------------------------------------
 			}elseif ($_GET['modus'] == 4){					//	Das Skript lehrer.php wurde vom Skript aktivitaeten au
 															//  aufgerufen. lehrer.php zeigt jetzt nur die lehreren zur
 															//  übergebenen aktivitaeten_id an. 
 
 				$suchfenster = 0									;
-				$where = 'WHERE l.l_id IN (
+				$where = 'WHERE f.l_id IN (
 											SELECT 		l_id 
-											FROM 	 	begleitet	
-											WHERE		f_id ='. $_GET["f_id"].'
+											FROM 		wirdangeboten 
+											WHERE		ak_id ='. $_GET["ak_id"].'
 										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+				echo '<input id="ak_id" name="ak_id" type="hidden" value="'.$_GET["ak_id"].'">';	// Die ak_id wird versteckt per GET weitergegeben
 				
-			// MODUS 5 --------------------------------------------------------------------------------------------------------------------------------
 			}elseif ($_GET['modus'] == 5){					// Hinzufügen eines Datensatzes			
 
 				$suchfenster = 0	;						// Es wird kein Suchfenster geöffnet
 				$where = ''			;						// Alle Datensätze werden angezeigt
-
-			// MODUS 8 MAP ----------------------------------------------------------------------------------------------------------------------------
-			}elseif ($_GET['modus'] == 8){					//	Das Skript lehrer.php wurde vom Skript aktivitaeten au
-															//  aufgerufen. lehrer.php zeigt jetzt nur die lehreren zur
-															//  übergebenen aktivitaeten_id an. 
-
-				$suchfenster = 0									;
-				$where = 'WHERE l.l_id NOT IN (
-											SELECT 		l_id 
-											FROM 		begleitet
-											WHERE		f_id ='. $_GET["f_id"].'
-										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
-
-			// MODUS 9 DELETE --------------------------------------------------------------------------------------------------------------------------
-			}elseif ($_GET['modus'] == 9){					//	Das Skript lehrer.php wurde vom Skript fahrt.php 
-															//  aufgerufen. lehrer.php zeigt jetzt nur die Lehrer an
-															//  die zur übergebenen f_id gehören
-
-				$suchfenster = 0									;
-				$where = 'WHERE l.l_id  IN (
-											SELECT 		l_id 
-											FROM 		begleitet
-											WHERE		f_id ='. $_GET["f_id"].'
-										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
-				
 			}
+
+
+
+			
+
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -397,19 +267,122 @@
 			}
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-			// Hier stand der SearchBlock siehe Datei SeachFragment.php
+
+			if ($suchfenster == 1){   // Der Link "suche/Search" im Menue "Lehreren" wurde angeklickt
+
+
+				// ---> Zunächste werden alle Datensätze angezeigt -----------------------------------------------
+
+				$formSelect = pg_query($db,
+											"	SELECT 				l.l_id, l.anrede, l.vname, l.nname,l.telnr
+												FROM 				lehrer l 
+												;
+								");
+
+				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	
+
+
+				$index=0;				// Zählt die Anzahl der Datensätze 
+
+				// ---> Erstellen eines Arrays mit den l_id's . Die ID's werden für das Select-Menü benötigt
+
+				while($row=pg_fetch_assoc($formSelect)){
+					$lehrerID[$index] = $row[$attributeLehrer[0]]		;
+					$index++										;
+				}
+				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+				$operator[0]=">"	;		// Array mit unterschiedlichen Operatoren für das Suchabfrage
+				$operator[1]=">="	;		// |
+				$operator[2]="="	;		// |
+				$operator[3]="<="	;		// |
+				$operator[4]="<"	;		// |
+
+
+				$verknuepfung[0] ="AND";	// Array mit unterschiedlichen Verknüpfungen unterschiedlicher Suchanfrage (NICHT UMGESETZT)
+				$verknuepfung[1] ="OR";		// |
+
+				asort($lehrerID);	// Sortierung der ID's
+
+
+
+				
+				echo'	<div id="suche">'																;
+				echo		'<form action="./lehrer.php?modus=3" method="post" autocomplete="off">'		;   // Such-Formular l_id
+				echo			'<label>LehrerID:'														;
+
+				
+				// 09 ---> Auswahlmenü Operatoren --------------------------------------------------------------
+				echo			'<select name="l_id_operator">'											;
+				echo '				<option>---				</option>'									;
+				foreach ($operator as $key => $val) {	
+					if (array_key_exists('l_id_operator',$_POST) && $_POST['l_id_operator']== $val){
+						echo '				<option selected >'.$val.'</option>'						;  	// Nach der Suche werden die Suchparameter
+					}else{																					// automatisch voreingestellt
+						echo '				<option >'.$val.'</option>'									;
+					}
+				}
+				echo '			</select>'																;	
+				// 09 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+				// 10 ---> Auswahlmenü l_id's -------------------------------------------------------------------
+				echo			'<select name="l_id">'													;
+				echo '				<option>---</option>'												;
+
+				foreach ($lehrerID as $key => $val) {	
+					if (array_key_exists('l_id',$_POST) && $_POST['l_id']== $val){
+						echo '				<option selected >'.$val.'</option>'						;	// Nach der Suche werden die Suchparameter
+					}else{																					// automatisch voreingestellt
+						echo '				<option>'.$val.'</option>'									;
+					}
+				}
+				
+				echo '			</select>'																;
+
+				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+				// ---> Manuelle Eingabe der gesuchten l_id --------------------------------------------------
+				if (array_key_exists('l_id_input',$_POST) && $_POST['l_id_input'] != ''){
+					echo '			<input id="l_id_input" name="l_id_input" maxlength="5" size="5" value='.$_POST['l_id_input'].'>'	; // Voreinstellung s.o	
+				}else{
+					echo '			<input id="l_id_input" name="l_id_input" maxlength="5" size="5" >'									;	
+				}
+				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+	
+				// ---> Auswahlmenü Verknüpfungsart -----------------------------------------------------------
+				echo			'<select name="l_id_verknuepfung">'												;
+				echo '				<option>---				</option>'											;
+				foreach ($verknuepfung as $key => $val) {	
+					if (array_key_exists('l_id_verknuepfung',$_POST) && $_POST['l_id_verknuepfung']== $val){
+						echo '				<option selected >'.$val.'</option>'								;
+					}else{
+						echo '				<option>'.$val.'</option>'											;
+					}
+				}
+
+				echo '			</select>'																		;
+				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				echo '		</label>'																	;
+				echo '		<button type="submit" name="action" value="5">Suche</button>'				;
+				echo '	</form>'																		;
+				echo '</div>'																			;		
+			}
 
 
 			echo'	<div id="rahmen_3">';
 			
-					if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 9) {				// Der Delete-Button wird angehängt
+					if(	array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {				// Der Delete-Button wird angehängt
 						echo '<form name="delete" action="lehrer.php" method="POST" >'		;	// Das fieldset wird für die Radio-Button benötigt
 						echo	'<fieldset>'												;
-					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7    ) {		// Der Edit-Button wird angehängt
+					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {		// Der Edit-Button wird angehängt
 						echo '<form name="edit" action="lehrer.php" method="POST" >'		;
 						echo	'<fieldset>'												; 	// Das fieldset wird für den Edit-Button benötigt
-					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==8 ||
-								array_key_exists('modus',$_GET) && $_GET['modus'] ==4    ) {		
+					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==8) {		
 						echo '<form name="edit" action="lehrer.php" method="POST" >'		;
 						echo	'<fieldset>'												; 	
 					}
@@ -430,13 +403,9 @@
 									}
 								}
 							
-							if(			array_key_exists('modus',$_GET) && $_GET['modus'] == 9) {				// Anfügen des Delete-Button
-								echo 	'<td class="rot">	
-												<button type="submit" name="action" value="1">DELETE</button>
-												<input id="f_id" name="f_id" type="hidden" value="'. $_GET['f_id']. '">
-										</td>'	;
-							}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7 ||
-										array_key_exists('modus',$_GET) && $_GET['modus'] ==4 ) {		// Anfügen des Edit-Button
+							if(			array_key_exists('modus',$_GET) && $_GET['modus'] ==6) {				// Anfügen des Delete-Button
+								echo '<td class="rot"><button type="submit" name="action" value="1">DELETE</button></td>'	;
+							}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7) {		// Anfügen des Edit-Button
 								echo '<td class="rot"><button type="submit" name="action" value="2">EDIT</button></td>'	;
 							}elseif(		array_key_exists('modus',$_GET) && $_GET['modus'] ==8) {		// Anfügen des Edit-Button
 								echo '<td class="rot"><button type="submit" name="action" value="8">SELECT</button></td>'	;
@@ -448,65 +417,50 @@
 							(array_key_exists('action',$_POST) 	&& $_POST["action"] 	== 2)			// Edit
 						  )  {
 
-										$SpeicherDefaultWerte= [							// Array zum Speichern der Defaultwerte der Formularlemente (Editieren)
+								$defaultValuesEdit = pg_query($db,
+														"	SELECT 		l.l_id, l.anrede, l.vname, l.nname, l.telnr
+															FROM 		lehrer l 
+															WHERE		l.l_id=" . $_POST['editieren']. "		
+															;
+													");								// SELECT-Anfrage für die Defaultwerte der Formularelemente (Editieren)
+
+								$SpeicherDefaultWerte= [							// Array zum Speichern der Defaultwerte der Formularlemente (Editieren)
 										"l_id" 			=> ""		,
 										"anrede"		=> ""		,
 										"vname"			=> ""		,
 										"nname"			=> ""		,
 										"telnr"			=> ""		,
 									];
-								if( array_key_exists('action',$_POST) 	&& $_POST["action"] == 2){			// Edit
-									print_r($SpeicherDefaultWerte  );
-									$defaultValuesEdit = pg_query($db,
-															"	SELECT 		l.l_id, l.anrede, l.vname, l.nname, l.telnr
-																FROM 		lehrer l 
-																WHERE		l.l_id=" . $_POST['editieren']. "		
-																;
-														");								// SELECT-Anfrage für die Defaultwerte der Formularelemente (Editieren)
 
-									$row=pg_fetch_assoc($defaultValuesEdit);
+								$row=pg_fetch_assoc($defaultValuesEdit);
 
-									foreach ($SpeicherDefaultWerte as $key => $val) { 		
-										$SpeicherDefaultWertePuffer[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
-									}
+								foreach ($SpeicherDefaultWerte as $key => $val) { 		
+									$SpeicherDefaultWertePuffer[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
 								}
+
 							
 							echo '<tr>'																											;
 							echo 	'<form name="insert" action="lehrer.php" method="POST" >'													;
 							echo		'<td	class= "gelb">'																		;
-
-								// ---> Wählen des passenden Submit-Button [ADD|Update] ---------------------------------------------------------------------
 								if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 8)){ 	// vormals 5
-									echo 			'<button type="submit" name="action" value="9">ADD</button>	'							; 	// Einfügen des ADD
+									echo 			'<button type="submit" name="action" value="0">ADD</button>	'							; 	// Einfügen des ADD
 								}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){										// ODER
 									echo 			'<button type="submit" name="action" value="3">Update</button>	'						;	// Update-Button
 								}
-								//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-								// ---> Versteckte Übergabe. Bei ADD -> f_i bei Update -> l_id   -------------------------------------------------------------
-								if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 8)){ 	// vormals 5
-									echo 			'<input id="f_id" name="f_id" type="hidden" value="'. $_GET['f_id']. '">'						; // Versteckt	
-								}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){											// ODER
-									echo 			'<input id="l_id" name="l_id" type="hidden" value="'. $SpeicherDefaultWertePuffer['l_id'] . '">'; // Versteckt	
-								}
-								//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+							echo 			'<input id="l_id" name="l_id" type="hidden" value="'. $SpeicherDefaultWertePuffer['l_id'] . '">'	; // Versteckt	
 							echo 		'</td>'																									;
 							echo 		'<td	class= "gelb">'																					;
 							echo 			'<input type="text" name="anrede" size="6" value="' .$SpeicherDefaultWertePuffer['anrede']. '"/>'	; // Input-Field &
 							echo 		'</td>'																									; // Defaultwert
 							echo 		'<td	class= "gelb">'																				;
-							echo 			'<input type="text" name="vname" size="15" value="' .$SpeicherDefaultWertePuffer['vname']. '"/>' ; // Inputfield "vname"
+							echo 			'<input type="text" name="vname" size="1" value="' .$SpeicherDefaultWertePuffer['vname']. '"/>' ; // Inputfield "vname"
 							echo 		'</td>'																								; // & Defaultwert
 							echo 		'<td	class= "gelb">'																				;
-							echo 			'<input type="text" name="nname" size="15" value="' .$SpeicherDefaultWertePuffer['nname']. '"/>' ; // Inputfield "vname"
+							echo 			'<input type="text" name="nname" size="1" value="' .$SpeicherDefaultWertePuffer['nname']. '"/>' ; // Inputfield "vname"
 							echo 		'</td>'																								;	
 							echo 		'<td	class= "gelb">'																				;
-							echo 			'<input type="text" name="telnr" size="15" value="' .$SpeicherDefaultWertePuffer['telnr']. '"/>' ; // Inputfield "vname"
+							echo 			'<input type="text" name="telnr" size="1" value="' .$SpeicherDefaultWertePuffer['telnr']. '"/>' ; // Inputfield "vname"
 							echo 		'</td>'																								;
-							echo 		'<td	class= "gelb">'																				;
-							echo 		'</td>'																								;	
 							echo 	'</form>'																								;	
 							echo '</tr>'																									;
 						}
@@ -528,11 +482,10 @@
 						
 									
 								}
-								if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 9) {	// Einfügen von Radiobutton zum Selektieren 
+								if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 6) {	// Einfügen von Radiobutton zum Selektieren 
 																								// von zu löschenden  tuple
 										echo '<td class="rot"><input type="radio" id="'. $lehrerID .'" name="loeschen" value="'. $lehrerID .'">'	;
-								}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] == 7 ||
-											array_key_exists('modus',$_GET) && $_GET['modus'] == 4 ) { 	// Einfügen von Radiobutton zum Selektieren 
+								}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] == 7) { 	// Einfügen von Radiobutton zum Selektieren 
 																										// von zu editierenden Tuple
 										echo '<td class="rot"><input type="radio" id="'. $lehrerID .'" name="editieren" value="'. $lehrerID .'">'	;
 								}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==8) { 	// Einfügen von Radiobutton zum Selektieren 

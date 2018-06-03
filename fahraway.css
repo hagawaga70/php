@@ -129,7 +129,7 @@ html{
 }
 
 td,th{
-	border				: solid black 2px	;
+	border				: solid #E0E0E0 2px	;
 	font-size			: 12px				;
 	padding				: 3px				;	
 	background-color	: white				;
