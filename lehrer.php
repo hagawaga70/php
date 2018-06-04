@@ -9,7 +9,7 @@
 		<?php
 
 			// GET  modus	1 2 3 4 5 8 9
-			// POST action  0 1 3 5   8 9
+			// POST action  0 1 2 3 5 8 9
 			// ------------------------------------------------------
 			// POST action 0  	Hinzufügen eines Datensatzes
 			// GET  modus  5	Hinzufügen eines Datensatzes
@@ -34,10 +34,16 @@
 			// .GET  modus  9   	lehrer.php wird von fahrt.php aufgerufen. 
 			// .POST action 1   	Entfernen eines Datensatzes
 			// --------------------------------------------------------------------------------------------------------------------------------------
+			// POST action  2 	Der zu editierende Datensatz wird kein zweites Mal angezeigt
+			// --------------------------------------------------------------------------------------------------------------------------------------
 
 
 			require("./navigationsMenue.php");			/*Der ausgelagerte Navigationsblock wird eingefügt*/
 
+			$schalter 		= ""	;  		// Wird benötigt beim Sortieren der Datensätze nach bestimmten Attributen
+			$suchfenster 	= 0		;		// ACHTUNG: Das Suchfenster wurde aus diesem Skript entfernt
+			$where			= ""	;		// Zur Erweiterung von SQL-SELECT-Statements
+			// -----------------------------------------------------------------------------------------------------
 			// ---> Array mit den Attributen der Relation "Lehrer" -----------------------------------------------
 			$attributeLehrer = [							
     			0	=> "l_id"		,
@@ -49,7 +55,10 @@
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
+
+			// -----------------------------------------------------------------------------------------------------
 			// ---> Array mit den Übersetzungen der Attribte  der Relation "Lehrer"------------------------------->
+
 			$spaltenBezeichnerLehrer = [
     			"l_id" 			=> "Fahrt"			,
     			"anrede"		=> "Anrede"			,
@@ -61,13 +70,18 @@
 
 			
 			
+			// -----------------------------------------------------------------------------------------------------
 			// ---> Datenbankanbindung  ------------------------------------------------------------------------
+
 			$db = pg_connect("host=localhost port=5432 dbname=fahraway user=parallels password=niewel");
+
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 						
+			// -----------------------------------------------------------------------------------------------------
 			// ---> Hinzufügen eines Datensatzes und Eintrag in die Relation "begleitet"---------------------------------------------------------------
+
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 9){
 
 				$result= pg_query($db,"SELECT nextval ('lehrerSeq')");   	// Eine neue ID für den Datensatz wird geliefert
@@ -102,14 +116,17 @@
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
+			// -----------------------------------------------------------------------------------------------------
 			// --> Löchen einer Verbindung (Relation: begleitet) zwischen einer Fahrt(Relation: fahrt) und einem Lehrer (Relation:Lehrer)
+
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 1){
 
 					$errorSwitch=true;	
 
-					if (pg_query($db,"BEGIN TRANSACTION;")) {
-					}else {
-					
+					if (pg_query($db,"BEGIN TRANSACTION;")) { 		// Da in zwei Relationen Veränderungen durchgeführt werden müssen. 
+					}else {											// kann im Fehlerfall eines Teil-SQL-Statements durch Transaction/Rollback
+																	// eine unvollständige Veränderung der Daten rückgängig gemacht werden
+
 						print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
 						print_r($mapping);							//Eine Fehlermeldung wird im Browser angezeigt 
 						$errorSwitch = false;
@@ -162,7 +179,9 @@
 						
 			}	
 
+			// -----------------------------------------------------------------------------------------------------
 			// ---> Verbindet eine Fahrt mit einem bestehenden Datensatz der Relation lehrer---------------------
+
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 8){
 
 				$insert = "INSERT INTO begleitet (l_id,f_id) VALUES (".$_POST['auswaehlen'].",".$_POST['f_id'].")"	;	// Erstellen des gesamten INSERT-Statement
@@ -176,16 +195,10 @@
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-
-
-
-
-
-
-
-
-
+/*
+			// -----------------------------------------------------------------------------------------------------
 			// Hinzufügen eines Datensatzes ------------------------------------------------------------------------
+
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 0){
 
 				$result= pg_query($db,"SELECT nextval ('lehrerSeq')");   // Eine neue ID für den Datensatz wird geliefert
@@ -217,9 +230,9 @@
 				}
 			}
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+*/
 
-
-			// 032 Editieren/Ändern eines Datensatzes ------------------------------------------------------------------------
+			// Editieren/Ändern eines Datensatzes ------------------------------------------------------------------------
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 3){		//	Ändern eines Datensatzes
 				$attributeUpdate=""	;												// Attribut-Zeichenkette für das Update-Statement
 				$valuesUpdate=""	;												// Value-Zeichenkette für das Update-Statement					
@@ -251,7 +264,7 @@
 			}
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
+/*
 			//ACHTUNG: Hier wird nur ein Datensatz geliefert, auch wenn der Schüler an mehreren Lehreren teilgenommen hat
 
 			if(	!array_key_exists('select',$_GET) ){
@@ -267,23 +280,24 @@
 			}else{
 				$schalter="";
 			}
+*/
 
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			
 			// ---> Erweiterung der SELECT-Anweisung: Abhängig vom Modus -------------------------------------
 			// MODUS 1 --------------------------------------------------------------------------------------------------------------------------------
-			if 		($_GET['modus'] == 1){					// Zeige alle Datensätze
+			if 		(array_key_exists('modus',$_GET) && $_GET['modus'] == 1){	// Zeige alle Datensätze
 
 				$where = '';								// -- kein WHERE-Clause 	
 
 			// MODUS 2 --------------------------------------------------------------------------------------------------------------------------------
-			}elseif ($_GET['modus'] == 2){					// Öffne Suchfenster und zeige alle Datensäte
+			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 2){	// Öffne Suchfenster und zeige alle Datensäte
 
 				$suchfenster 	= 1		;					// 1 -> Suchfenster wird geöffnet
 				$where 			= ''	;					// -- kein WHERE-Clause 	
 				
 			// MODUS 3 --------------------------------------------------------------------------------------------------------------------------------
-			}elseif ($_GET['modus'] == 3){					// Öffne Suchfenster und zeigt die selektierten Datensätze
+			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 3){	// Öffne Suchfenster und zeigt die selektierten Datensätze
 
 				$suchfenster = 1										;	// 1 -> Suchfenster wird geöffnet
 				if (is_numeric($_POST["l_id_input"])){						// Anführungsstriche werden entfernt
@@ -295,25 +309,24 @@
 				
 				
 			// MODUS 4 --------------------------------------------------------------------------------------------------------------------------------
-			}elseif ($_GET['modus'] == 4){					//	Das Skript lehrer.php wurde vom Skript aktivitaeten au
+			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 4){	//	Das Skript lehrer.php wurde vom Skript aktivitaeten au
 															//  aufgerufen. lehrer.php zeigt jetzt nur die lehreren zur
 															//  übergebenen aktivitaeten_id an. 
 
-				$suchfenster = 0									;
 				$where = 'WHERE l.l_id IN (
 											SELECT 		l_id 
 											FROM 	 	begleitet	
 											WHERE		f_id ='. $_GET["f_id"].'
-										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+										)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 				
 			// MODUS 5 --------------------------------------------------------------------------------------------------------------------------------
-			}elseif ($_GET['modus'] == 5){					// Hinzufügen eines Datensatzes			
+			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 5){		// Hinzufügen eines Datensatzes			
 
 				$suchfenster = 0	;						// Es wird kein Suchfenster geöffnet
 				$where = ''			;						// Alle Datensätze werden angezeigt
 
 			// MODUS 8 MAP ----------------------------------------------------------------------------------------------------------------------------
-			}elseif ($_GET['modus'] == 8){					//	Das Skript lehrer.php wurde vom Skript aktivitaeten au
+			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 8){		//	Das Skript lehrer.php wurde vom Skript aktivitaeten au
 															//  aufgerufen. lehrer.php zeigt jetzt nur die lehreren zur
 															//  übergebenen aktivitaeten_id an. 
 
@@ -322,10 +335,10 @@
 											SELECT 		l_id 
 											FROM 		begleitet
 											WHERE		f_id ='. $_GET["f_id"].'
-										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+										)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 
 			// MODUS 9 DELETE --------------------------------------------------------------------------------------------------------------------------
-			}elseif ($_GET['modus'] == 9){					//	Das Skript lehrer.php wurde vom Skript fahrt.php 
+			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 9){		//	Das Skript lehrer.php wurde vom Skript fahrt.php 
 															//  aufgerufen. lehrer.php zeigt jetzt nur die Lehrer an
 															//  die zur übergebenen f_id gehören
 
@@ -336,8 +349,8 @@
 											WHERE		f_id ='. $_GET["f_id"].'
 										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 				
-			// ACTION 2 DELETE --------------------------------------------------------------------------------------------------------------------------
-			}elseif ($_POST['action'] == 2){				
+			// ACTION 2 UPDATE --------------------------------------------------------------------------------------------------------------------------
+			}elseif (array_key_exists('action',$_POST) && $_POST['action'] == 2){ // Der zu editieren Datensatz wird kein zweites Mal angezeigt
 
 				$suchfenster = 0									;
 				$where = 'WHERE l.l_id != '. $_POST["editieren"];   // Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
@@ -419,6 +432,25 @@
 						echo	'<fieldset>'												; 	
 					}
 
+					$SpeicherDefaultWerte= [				// Array zum Speichern der Defaultwerte der Formularelemente (Editieren)
+						"l_id" 			=> ""		,
+						"anrede"		=> ""		,
+						"vname"			=> ""		,
+						"nname"			=> ""		,
+						"telnr"			=> ""		,
+					];
+
+					$SpeicherDefaultWertePuffer= [				// Array zum Speichern der Defaultwerte der Formularelemente (Editieren)
+						"l_id" 			=> ""		,
+						"anrede"		=> ""		,
+						"vname"			=> ""		,
+						"nname"			=> ""		,
+						"telnr"			=> ""		,
+					];
+
+
+
+
 
 					echo "<table>";
 
@@ -456,14 +488,7 @@
 							(array_key_exists('action',$_POST) 	&& $_POST["action"] 	== 2)			// Edit
 						  )  {
 
-										$SpeicherDefaultWerte= [							// Array zum Speichern der Defaultwerte der Formularlemente (Editieren)
-										"l_id" 			=> ""		,
-										"anrede"		=> ""		,
-										"vname"			=> ""		,
-										"nname"			=> ""		,
-										"telnr"			=> ""		,
-									];
-								if( array_key_exists('action',$_POST) 	&& $_POST["action"] == 2){			// Edit
+																		if( array_key_exists('action',$_POST) 	&& $_POST["action"] == 2){			// Edit
 									$defaultValuesEdit = pg_query($db,
 															"	SELECT 		l.l_id, l.anrede, l.vname, l.nname, l.telnr
 																FROM 		lehrer l 
@@ -478,15 +503,15 @@
 									}
 								}
 							
-							echo '<tr>'																											;
-							echo 	'<form name="insert" action="lehrer.php" method="POST" >'													;
-							echo		'<td	class= "gelb">'																		;
+							echo '<tr>'																		;
+							echo 	'<form name="insert" action="lehrer.php" method="POST" >'				;
+							echo		'<td	class= "gelb">'												;
 
 								// ---> Wählen des passenden Submit-Button [ADD|Update] ---------------------------------------------------------------------
 								if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 8)){ 	// vormals 5
-									echo 			'<button type="submit" name="action" value="9">ADD</button>	'							; 	// Einfügen des ADD
-								}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){										// ODER
-									echo 			'<button type="submit" name="action" value="3">Update</button>	'						;	// Update-Button
+									echo 			'<button type="submit" name="action" value="9">ADD</button>	'					; 	// Einfügen des ADD
+								}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){						
+									echo 			'<button type="submit" name="action" value="3">Update</button>	'				;	// Update-Button
 								}
 								//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -504,13 +529,13 @@
 							echo 			'<input type="text" name="anrede" size="6" value="' .$SpeicherDefaultWertePuffer['anrede']. '"/>'	; // Input-Field &
 							echo 		'</td>'																									; // Defaultwert
 							echo 		'<td	class= "gelb">'																				;
-							echo 			'<input type="text" name="vname" size="15" value="' .$SpeicherDefaultWertePuffer['vname']. '"/>' ; // Inputfield "vname"
+							echo 			'<input type="text" name="vname" size="15" value="' .$SpeicherDefaultWertePuffer['vname']. '"/>'; // Inputfield "vname"
 							echo 		'</td>'																								; // & Defaultwert
 							echo 		'<td	class= "gelb">'																				;
-							echo 			'<input type="text" name="nname" size="15" value="' .$SpeicherDefaultWertePuffer['nname']. '"/>' ; // Inputfield "vname"
+							echo 			'<input type="text" name="nname" size="15" value="' .$SpeicherDefaultWertePuffer['nname']. '"/>'; // Inputfield "vname"
 							echo 		'</td>'																								;	
 							echo 		'<td	class= "gelb">'																				;
-							echo 			'<input type="text" name="telnr" size="15" value="' .$SpeicherDefaultWertePuffer['telnr']. '"/>' ; // Inputfield "vname"
+							echo 			'<input type="text" name="telnr" size="15" value="' .$SpeicherDefaultWertePuffer['telnr']. '"/>'; // Inputfield "vname"
 							echo 		'</td>'																								;
 							echo 	'</form>'																								;	
 							echo '</tr>'																									;

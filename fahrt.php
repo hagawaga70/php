@@ -22,7 +22,7 @@
 			// -----------------------------------------------------------------------------------------------------------------------------------------
 			// GET  modus  10 	Aufruf von lehrer.php. Anzeige von Datensätzen die zu einer bestimmten LehrerID gehören 
 
-
+			$suchfenster = 0;
 
 			require("./navigationsMenue.php");			/*Der ausgelagerte Navigationsblock wird eingefügt*/
 

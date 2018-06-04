@@ -1,0 +1,35 @@
+			// -----------------------------------------------------------------------------------------------------
+			// Hinzufügen eines Datensatzes ------------------------------------------------------------------------
+
+			if(	array_key_exists('action',$_POST) && $_POST["action"] == 0){
+
+				$result= pg_query($db,"SELECT nextval ('lehrerSeq')");   // Eine neue ID für den Datensatz wird geliefert
+				while($row=pg_fetch_assoc($result)){					// |
+					$lehrerSequenceNr = $row['nextval'];					// |
+				}														// |
+
+
+				$attributeInsert="";	//  Die Attribute für das INSERT-Statement werden hier abgespeichert
+				$valuesInsert="";		//  Die Werte der einzelnen Attribute werden hier abgespeichert
+				foreach ($attributeLehrer as $key => $val) {
+					if ($key == 0){
+						$attributeInsert	= $attributeInsert .$val .							","	;  	// ...., attribute1, attribute2, ...			
+						$valuesInsert 		= $valuesInsert .	$lehrerSequenceNr .				","	;	// Anhängen der Werte: Hier die neue ID	
+					}elseif ($key <= 3){
+						$attributeInsert	= $attributeInsert.$val.							","	;	// Anhängen mit , als Separationszeichen
+						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'".		","	;   // | 
+					}elseif($key==4){
+						$attributeInsert	= $attributeInsert.$val									;	// Letztes/r Attribut/Wert daher ohne Komma	
+						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'"			;   // anhängen
+					}
+				}
+				$insert = "INSERT INTO lehrer (".$attributeInsert.") VALUES (".$valuesInsert .")"	;	// Erstellen des gesamten INSERT-Statement
+
+				if (pg_query($db,$insert)) {					// Ausführten des INSERT-Statements 
+				}else {
+					print_r( "Data entry unsuccessful. ")	;	// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
+					print_r(pg_last_error($db))				;   // |
+				}
+			}
+			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
