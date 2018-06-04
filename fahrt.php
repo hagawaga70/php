@@ -581,11 +581,11 @@
 										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">&#x2795;</a></td>';
 										//echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">ADD</a></td>';
 									}elseif( $value == "dummy01"){
-										echo '<td class="hellgrau">' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">&#x1f441;</a></td>';	// Link
-										echo '<td class="hellgrau">' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">&#x2795;</a></td>'	; 	// Link
-										echo '<td class="hellgrau">' . '<a href="addShowSchuler.php?sort=&f_id='.$fahrtID.'">&#x2796;</a></td>';  	// Link
+										echo '<td class="grau">' . '<a href="schueler.php?modus=4&f_id='.$fahrtID.'">&#x1f441;</a></td>';	// Link
+										echo '<td class="grau">' . '<a href="schueler.php?modus=8&f_id='.$fahrtID.'">&#x2795;</a></td>';	// Link
+										echo '<td class="grau">' . '<a href="schueler.php?modus=9&f_id='.$fahrtID.'">&#x2796;</a></td>';	// Link
 									}elseif( $value == "dummy02"){
-										echo '<td class="grau">' . '<a href="lehrer.php?modus=4&f_id='.$fahrtID.'">&#x1f441;</a></td>';	// Link
+										echo '<td class="grau">' . '<a href="lehrer.php?modus=4&f_id='.$fahrtID.'">&#x1f441;</a></td>';		// Link
 										echo '<td class="grau">' . '<a href="lehrer.php?modus=8&f_id='.$fahrtID.'">&#x2795;</a></td>';		// Link
 										echo '<td class="grau">' . '<a href="lehrer.php?modus=9&f_id='.$fahrtID.'">&#x2796;</a></td>';		// Link
 									}elseif( $value == 'f_id'){

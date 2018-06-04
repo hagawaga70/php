@@ -33,7 +33,7 @@
 			<div class="naviBox"> 
   					<div class="naviInline">Schüler:																</div> 
   					<div class="naviInline"><a class="ankerNavi"  href="schueler.php?modus=1">Zeige</a>				</div> 
-					<div class="naviInline"><a class="ankerNavi"  href="schueler.php?modus=7">Suche</a>	    		</div> 
+					<div class="naviInline"><a class="ankerNavi"  href="schueler.php?modus=7">Edit</a>	    		</div> 
 			</div> 
 			<div class="naviBox"> 
   					<div class="naviInline">Lehrer:																	</div> 

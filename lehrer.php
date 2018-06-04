@@ -18,10 +18,10 @@
 			// ------------------------------------------------------
 			// GET  modus  1 	Zeige alle Datensätze
 			// --------------------------------------------------------------------------------------------------------------------------------------
-			// GET  modus  2 	Öffnet das Suchfenster und zeigt  alle Datensätze
+			// GET  modus  2 	Öffnet das Suchfenster und zeigt  alle Datensätze (NICHT IMPLEMENTIERT)
 			// --------------------------------------------------------------------------------------------------------------------------------------
-			// GET  modus  3 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze
-			// POST action 5 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  // action und der Wert 5 werden nirgends weiter abgefragt
+			// GET  modus  3 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  (NICHT IMPLEMENTIERT)
+			// POST action 5 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  (NICHT IMPLEMENTIERT)
 			// --------------------------------------------------------------------------------------------------------------------------------------
 			// GET  modus  4   	lehrer.php wird von fahrt.php aufgerufen und zeigt alle Lehrer, die an einer bestimmten Fahrt teilnehmen 	
 			// --------------------------------------------------------------------------------------------------------------------------------------
