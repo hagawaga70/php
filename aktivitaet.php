@@ -330,7 +330,7 @@
 			// MODUS 1 --------------------------------------------------------------------------------------------------------------------------------
 			if 		(array_key_exists('modus',$_GET) && $_GET['modus'] == 1){	// Zeige alle Datensätze
 
-				$where = 'WHERE ak.anbietr = an.an_id';								// -- kein WHERE-Clause 	
+				$where = 'WHERE ak.anbietr = an.an_id';								
 
 			// MODUS 2 --------------------------------------------------------------------------------------------------------------------------------
 			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 2){	// Öffne Suchfenster und zeige alle Datensäte
@@ -355,7 +355,8 @@
 															//  aufgerufen. aktivitaet.php zeigt jetzt nur die aktivitaeten zur
 															//  übergebenen aktivitaeten_id an. 
 
-				$where = 'WHERE ak.ak_id IN (
+				$where = 'WHERE ak.anbietr = an.an_id AND
+								ak.ak_id IN (
 											SELECT 		ak_id 
 											FROM 	 	wirdangeboten	
 											WHERE		f_id ='. $_GET["f_id"].'
@@ -369,13 +370,14 @@
 
 			// MODUS 8 MAP ----------------------------------------------------------------------------------------------------------------------------
 			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 8){		//	Das Skript aktivitaet.php wurde vom Skript  fahrt.php
-															//  aufgerufen. aktivitaet.php zeigt jetzt nur die aktivitaeten zur
+															//  aufgerufen. aktivitaet.php zeigt jetzt nur die Aktivitaeten zur
 															//  übergebenen f_id an. 
 
 				$suchfenster = 0									;
-				$where = 'WHERE ak.ak_id NOT IN (
+				$where = 'WHERE ak.anbietr = an.an_id AND 
+								ak.ak_id NOT IN (
 											SELECT 		ak_id 
-											FROM 		wirdbegleitet
+											FROM 		wirdangeboten
 											WHERE		f_id ='. $_GET["f_id"].'
 										)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 
@@ -436,11 +438,10 @@
 																	ak.jahrz3,	ak.jahrz4	, ak.mialt	, ak.dauer	, ak.akpreis, 
 																	an.an_name
 												FROM 				aktivitaet ak, anbieter an
+												" . $where . "
 												;
 								");
 
-
-				
 			}
 
 
@@ -453,14 +454,14 @@
 			
 					if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 9) {				// Der Delete-Button wird angehängt
 						echo '<form name="delete" action="aktivitaet.php" method="POST" >'		;	// Das fieldset wird für die Radio-Button benötigt
-						echo	'<fieldset>'												;
+						echo	'<fieldset>'													;
 					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==7    ) {		// Der Edit-Button wird angehängt
 						echo '<form name="edit" action="aktivitaet.php" method="POST" >'		;
-						echo	'<fieldset>'												; 	// Das fieldset wird für den Edit-Button benötigt
+						echo	'<fieldset>'													; 	// Das fieldset wird für den Edit-Button benötigt
 					}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] ==8 ||
 								array_key_exists('modus',$_GET) && $_GET['modus'] ==4    ) {		
 						echo '<form name="edit" action="aktivitaet.php" method="POST" >'		;
-						echo	'<fieldset>'												; 	
+						echo	'<fieldset>'													;	 	
 					}
 
 					$SpeicherDefaultWerte= [				// Array zum Speichern der Defaultwerte der Formularelemente (Editieren)
@@ -537,11 +538,13 @@
 							(array_key_exists('action',$_POST) 	&& $_POST["action"] 	== 2)			// Edit
 						  )  {
 
-																		if( array_key_exists('action',$_POST) 	&& $_POST["action"] == 2){			// Edit
+								if( array_key_exists('action',$_POST) 	&& $_POST["action"] == 2){			// Edit
 									$defaultValuesEdit = pg_query($db,
-															"	SELECT 		l.ak_id, l.anrede, l.vname, l.nname, l.telnr
-																FROM 		aktivitaet l 
-																WHERE		l.ak_id=" . $_POST['editieren']. "		
+															"	SELECT 		ak.ak_id , 	ak.bewert	, ak.bezng 	, ak.art 	, ak.katgrie,
+																			ak.fabezg,	ak.ort		, ak.vorstzg, ak.jahrz1	, ak.jahrz2	,
+																			ak.jahrz3,	ak.jahrz4	, ak.mialt	, ak.dauer	, ak.akpreis 
+																FROM 		aktivitaet ak 
+																WHERE		ak.ak_id=" . $_POST['editieren']. "		
 																;
 														");								// SELECT-Anfrage für die Defaultwerte der Formularelemente (Editieren)
 
@@ -577,44 +580,47 @@
 									echo 		'</td>'		;
 
 								$formInputSize = [					// 
-									"anbietr" 	=>	15		,
-									"bewert" 	=>  3		,
-									"bezng" 	=>  15		,
-									"art" 		=>	15		,
-									"katgrie" 	=>	15		,
-									"fabezg" 	=>	15		,
-									"ort" 		=>	15		,
-									"vorstzg" 	=>	25		,
-									"jahrz1" 	=>	5		,
-									"jahrz2" 	=>	5		,
-									"jahrz3" 	=>	5		,
-									"jahrz4" 	=>	5		,
-									"mialt" 	=>	5		,
-									"dauer" 	=>	5		,
-									"akpreis" 	=>	8		,
-									"ak_id" 	=>	10		,
+									"anbietr" 	=>	1		,
+									"bewert" 	=>  1		,
+									"bezng" 	=>  1		,
+									"art" 		=>	1		,
+									"katgrie" 	=>	1		,
+									"fabezg" 	=>	1		,
+									"ort" 		=>	1		,
+									"vorstzg" 	=>	1		,
+									"jahrz1" 	=>	1		,
+									"jahrz2" 	=>	1		,
+									"jahrz3" 	=>	1		,
+									"jahrz4" 	=>	1		,
+									"mialt" 	=>	1		,
+									"dauer" 	=>	1		,
+									"akpreis" 	=>	1		,
+									"ak_id" 	=>	1		,
 								];
 											
+								print_r($formInputSize );
+								print_r($attributeAktivitaet);
+								foreach($attributeAktivitaet as $key => $value) {
+									if($value == "an_name"){
+									}else{
 
-								foreach ($attributeAktivitaet as $key => $val) {
-									echo 		'<td	class= "gelb">'											;
-									echo 			'<input type="text" name="'					.
-															$attributeAktivitaet[ $key ]		.	
-															'" size="'							.
-															$formInputSize[$key]				.
-															'" value="' 						.
-															$SpeicherDefaultWertePuffer[ $key ]	. 
-															'"/>'												; 
-									echo 		'</td>'															; 
+											echo 		'<td	class= "gelb">'											;
+											echo 			'<input type="text" name="'					.
+																	$attributeAktivitaet[ $key ]		.	
+																	'" size="'.$formInputSize[$value]	.
+																	'" value="' 						.
+																	$SpeicherDefaultWertePuffer[ $key ]	. 
+																	'"/>'												; 
+											echo 		'</td>'															; 
+									}
 								} // -------------------------------------------------------------------------
 									echo 	'</form>'															;	
 									echo '</tr>'																;
 						}
 
-						// 14 ---> Zeigt die Datensätze in einer Tabelle an--------------------------------------------------
+						// ---> Zeigt die Datensätze in einer Tabelle an--------------------------------------------------
 					
 						while($row=pg_fetch_assoc($result)){					// Anzeigen der Datensätze
-/*							print_r($row);*/
 							echo "<tr>";
 								foreach ($attributeAktivitaet as $value)	{
 									if($value == 'ak_id') {						// Zum Aufrufen anderer Skripte wird die ak_id benötigt
@@ -623,8 +629,14 @@
 									
 									if( $value == 'ak_id'){
 										echo '<td class="hellgrau">' . '<a href="fahrt.php?modus=10&ak_id='.$aktivitaetID.'">&#x1f441;</a></td>'; // Link
-									}else{
-										echo "<td>" .$row[ $value] . "</td>";
+									}elseif($value == 'jahrz1' || $value == 'jahrz2' ||  $value == 'jahrz3' ||  $value == 'jahrz4' )
+										if ($row[ $value ] == 't'){
+											echo "<td>ja</td>";
+										}else{
+											echo "<td>nein</td>";
+										}
+									else{
+										echo "<td>" . $row[ $value] . "</td>";
 									}
 						
 									
