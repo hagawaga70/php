@@ -1,0 +1,20 @@
+CREATE TABLE public.aktivitaet (
+    ak_id integer NOT NULL,
+    bewert integer,
+    bezng character varying(50),
+    art character varying(50),
+    katgrie character varying(50),
+    fabezg character varying(50),
+    ort character varying(50),
+    vorstzg character varying(50),
+    jahrz1 boolean,
+    jahrz2 boolean,
+    jahrz3 boolean,
+    jahrz4 boolean,
+    mialt integer,
+    dauer integer,
+    akpreis numeric(5,2),
+    anbietr integer,
+    CONSTRAINT bewert_min_max CHECK (((bewert >= 0) AND (bewert <= 10)))
+);
+

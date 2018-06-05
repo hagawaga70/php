@@ -589,9 +589,9 @@
 										echo '<td class="grau">' . '<a href="lehrer.php?modus=8&f_id='.$fahrtID.'">&#x2795;</a></td>';		// Link
 										echo '<td class="grau">' . '<a href="lehrer.php?modus=9&f_id='.$fahrtID.'">&#x2796;</a></td>';		// Link
 									}elseif( $value == 'f_id'){
-										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&f_id='.$fahrtID.'">&#x1f441;</a></td>'; // Link
-										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&f_id='.$fahrtID.'">&#x2795;</a></td>';  // Link
-										echo '<td class="hellgrau">' . '<a href="unterkunft.php?modus=1&f_id='.$fahrtID.'">&#x2796;</a></td>';  // Link
+										echo '<td class="hellgrau">' . '<a href="aktivitaet.php?modus=4&f_id='.$fahrtID.'">&#x1f441;</a></td>'; // Link
+										echo '<td class="hellgrau">' . '<a href="aktivitaet.php?modus=8&f_id='.$fahrtID.'">&#x2795;</a></td>';  // Link
+										echo '<td class="hellgrau">' . '<a href="aktivitaet.php?modus=9&f_id='.$fahrtID.'">&#x2796;</a></td>';  // Link
 									}else{
 										echo "<td>" .$row[ $value] . "</td>";
 									}

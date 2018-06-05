@@ -272,7 +272,7 @@
 			}elseif (array_key_exists('select', $_GET) && array_key_exists('l_id',$_GET) ){ // Aufruf von lehrer.php durch schueler.php
 				$where = "WHERE f.l_id =".$_GET['l_id'];
 			}
-
+*/
 			// --->  Verhinderung von Fehlermeldungen ---------------------------------------------------------
 
 			if(array_key_exists('sort',$_GET)){
@@ -280,7 +280,6 @@
 			}else{
 				$schalter="";
 			}
-*/
 
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			

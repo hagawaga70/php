@@ -1,0 +1,19 @@
+			$spaltenBezeichnerAktivitaeten = [
+				"anbietr" 	=>	"Anbieter"		,
+				"bewert" 	=>  "Bewertung"		,
+				"bezng" 	=>  "Bezeichung"	,
+				"art" 		=>	"Art"			,
+				"katgrie" 	=>	"Kategorie"		,
+				"fabezg" 	=>	"Fachbezug"		,
+				"ort" 		=>	"Ort"			,
+				"vorstzg" 	=>	"Voraussetzung"	,
+				"jahrz1" 	=>	"Frühjahr"		,
+				"jahrz2" 	=>	"Sommer"		,
+				"jahrz3" 	=>	"Herbst"		,
+				"jahrz4" 	=>	"Winter"		,
+				"mialt" 	=>	"Mindestalter"	,
+				"dauer" 	=>	"Dauer/h"		,
+				"akpreis" 	=>	"Preis"			,
+				"ak_id" 	=>	"Fahrt"		,
+			];
+			// 02<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
