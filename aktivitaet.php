@@ -42,7 +42,7 @@
 
 			$schalter 		= ""	;  		// Wird benötigt beim Sortieren der Datensätze nach bestimmten Attributen
 			$suchfenster 	= 0		;		// ACHTUNG: Das Suchfenster wurde aus diesem Skript entfernt
-			$where			= ""	;		// Zur Erweiterung von SQL-SELECT-Statements
+			$on				= ""	;		// Zur Erweiterung von SQL-SELECT-Statements
 			// -----------------------------------------------------------------------------------------------------
 			// ---> Array mit den Attributen der Relation "Aktivitaet" -----------------------------------------------
 
@@ -113,29 +113,30 @@
 				}
 				$mapping =
 
-						"WITH data (ak_id,bewert,bezng,art,katgrie,fabezg,ort,vorstzg,jahrz1,jahrz2,jahrz3,jahrz4,mialt,dauer,akpreis) 
+						"WITH data (ak_id,bewert,bezng,art,katgrie,fabezg,ort,vorstzg,jahrz1,jahrz2,jahrz3,jahrz4,mialt,dauer,akpreis,f_id) 
 						AS (
 								VALUES (".
-											$aktivitaetSequenceNr 		.","	.
-											$_POST["bewert"	]			.",'"	.
-											$_POST["bezng"	]			."','"	.
-											$_POST["art"	]			."','"	.
-											$_POST["katgrie"]			."','"	.
-											$_POST["fabezg"	]			."','"	.
-											$_POST["ort"	]			."','"	.
-											$_POST["vorstzg"]			."','"	.
-											$_POST["jahrz1"	]			."','"	.
-											$_POST["jahrz2"	]			."','"	.
-											$_POST["jahrz3"	]			."','"	.
-											$_POST["jahrz4"	]			."',"	.
-											$_POST["mialt"	]			.","	.
-											$_POST["dauer"	]			.","	.
-											$_POST["akpreis"]			.")
+											$aktivitaetSequenceNr 								.","	.
+											$_POST["bewert"	]									.",'"	.
+											$_POST["bezng"	]									."','"	.
+											$_POST["art"	]									."','"	.
+											$_POST["katgrie"]									."','"	.
+											$_POST["fabezg"	]									."','"	.
+											$_POST["ort"	]									."','"	.
+											$_POST["vorstzg"]									."',"	.
+											($_POST["jahrz1"] 	== 'ja'? 'true' : 'false')		.","	.
+											($_POST["jahrz2"]	== 'ja'? 'true' : 'false')		.","	.
+											($_POST["jahrz3"]	== 'ja'? 'true' : 'false')		.","	.
+											($_POST["jahrz4"]	== 'ja'? 'true' : 'false')		.","	.
+											$_POST["mialt"	]									.","	.
+											$_POST["dauer"	]									.","	.
+											$_POST["akpreis"]									.","	.
+											$_POST["f_id"]										.")		
 
 						), 
 						ins1 AS (
 							INSERT INTO aktivitaet (ak_id,bewert,bezng,art,katgrie,fabezg,ort,vorstzg,jahrz1,jahrz2,jahrz3,jahrz4,mialt,dauer,akpreis)
-							SELECT FROM data
+							SELECT                  ak_id,bewert,bezng,art,katgrie,fabezg,ort,vorstzg,jahrz1,jahrz2,jahrz3,jahrz4,mialt,dauer,akpreis FROM data
 							ON CONFLICT DO NOTHING
 							Returning ak_id
 						)
@@ -143,11 +144,6 @@
 							SELECT 	ak_id, f_id
 							FROM 	data
 							JOIN ins1 USING (ak_id);";
-
-
-
-
-
 
 				if (pg_query($db,$mapping)) {
 				}else {
@@ -162,311 +158,315 @@
 			// -----------------------------------------------------------------------------------------------------
 			// --> Löchen einer Verbindung (Relation: begleitet) zwischen einer Fahrt(Relation: fahrt) und einem Aktivitaet (Relation:Aktivitaet)
 
-			if(	array_key_exists('action',$_POST) && $_POST["action"] == 1){
+if(	array_key_exists('action',$_POST) && $_POST["action"] == 1){
 
-					$errorSwitch=true;	
+		$errorSwitch=true;	
 
-					if (pg_query($db,"BEGIN TRANSACTION;")) { 		// Da in zwei Relationen Veränderungen durchgeführt werden müssen. 
-					}else {											// kann im Fehlerfall eines Teil-SQL-Statements durch Transaction/Rollback
-																	// eine unvollständige Veränderung der Daten rückgängig gemacht werden
+		if (pg_query($db,"BEGIN TRANSACTION;")) { 		// Da in zwei Relationen Veränderungen durchgeführt werden müssen. 
+		}else {											// kann im Fehlerfall eines Teil-SQL-Statements durch Transaction/Rollback
+				// eine unvollständige Veränderung der Daten rückgängig gemacht werden
+
+				print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+				print_r($mapping);							//Eine Fehlermeldung wird im Browser angezeigt 
+				$errorSwitch = false;
+		}
+
+		$deleteBegleitet = 	" 	DELETE FROM wirdangeboten
+				WHERE		f_id = " .$_POST['f_id']. "
+				AND			ak_id = " .$_POST['loeschen']. ";"
+				;
+
+
+		if ($errorSwitch && pg_query($db,$deleteBegleitet)) {
+		}else {
+
+				print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+				print_r($deleteBegleitet );					//Eine Fehlermeldung wird im Browser angezeigt 
+				$errorSwitch = false;
+		}
+
+
+		$deleteAktivitaet = "	DELETE FROM aktivitaet 
+				WHERE	ak_id=".$_POST['loeschen']."
+				AND		0 = (	SELECT 	count(*) 
+								FROM	wirdangeboten
+								WHERE	ak_id = ".$_POST['loeschen']."); "
+				;
+
+
+
+		if ($errorSwitch && pg_query($db,$deleteAktivitaet)) {
+
+				if (pg_query($db,"COMMIT;")) {
+				}else {
 
 						print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-						print_r($mapping);							//Eine Fehlermeldung wird im Browser angezeigt 
-						$errorSwitch = false;
-					}
-				
-					$deleteBegleitet = 	" 	DELETE FROM wirdangeboten
-											WHERE		f_id = " .$_POST['f_id']. "
-											AND			ak_id = " .$_POST['loeschen']. ";"
-										;
+						print_r($deleteAktivitaet );					//Eine Fehlermeldung wird im Browser angezeigt 
 
-
-					if ($errorSwitch && pg_query($db,$deleteBegleitet)) {
-					}else {
-					
-						print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-						print_r($deleteBegleitet );					//Eine Fehlermeldung wird im Browser angezeigt 
-						$errorSwitch = false;
-					}
-
-
-					$deleteAktivitaet = "	DELETE FROM aktivitaet 
-											WHERE	ak_id=".$_POST['loeschen']."
-											AND		0 = (	SELECT 	count(*) 
-															FROM	wirdangeboten
-															WHERE	ak_id = ".$_POST['loeschen']."); "
-									;
-
-
-
-					if ($errorSwitch && pg_query($db,$deleteAktivitaet)) {
-
-						if (pg_query($db,"COMMIT;")) {
-						}else {
-					
-							print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-							print_r($deleteAktivitaet );					//Eine Fehlermeldung wird im Browser angezeigt 
-
-							if (pg_query($db,"ROllBACK;")) {
-							}else {
-					
-								print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-							}
-						}
-					}else{
 						if (pg_query($db,"ROllBACK;")) {
 						}else {
-							print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+
+								print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
 						}
-					}
-						
-			}	
-
-			// -----------------------------------------------------------------------------------------------------
-			// ---> Verbindet eine Fahrt mit einem bestehenden Datensatz der Relation aktivitaet---------------------
-
-			if(	array_key_exists('action',$_POST) && $_POST["action"] == 8){
-
-				$insert = "INSERT INTO wirdangeboten (ak_id,f_id) VALUES (".$_POST['auswaehlen'].",".$_POST['f_id'].")"	;	// Erstellen des gesamten INSERT-Statement
-
-				if (pg_query($db,$insert)) {					// Ausführten des INSERT-Statements 
-				}else {
-					print_r( "Data entry unsuccessful. ")	;	// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
-					print_r(pg_last_error($db))				;   // |
 				}
-			}			
-			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		}else{
+				if (pg_query($db,"ROllBACK;")) {
+				}else {
+						print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+				}
+		}
+
+}	
+
+// -----------------------------------------------------------------------------------------------------
+// ---> Verbindet eine Fahrt mit einem bestehenden Datensatz der Relation aktivitaet---------------------
+
+if(	array_key_exists('action',$_POST) && $_POST["action"] == 8){
+
+		$insert = "INSERT INTO wirdangeboten (ak_id,f_id) VALUES (".$_POST['auswaehlen'].",".$_POST['f_id'].")"	;	// Erstellen des gesamten INSERT-Statement
+
+		if (pg_query($db,$insert)) {					// Ausführten des INSERT-Statements 
+		}else {
+				print_r( "Data entry unsuccessful. ")	;	// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
+				print_r(pg_last_error($db))				;   // |
+		}
+}			
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 /*
-			// -----------------------------------------------------------------------------------------------------
-			// Hinzufügen eines Datensatzes ------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------
+// Hinzufügen eines Datensatzes ------------------------------------------------------------------------
 
-			if(	array_key_exists('action',$_POST) && $_POST["action"] == 0){
+if(	array_key_exists('action',$_POST) && $_POST["action"] == 0){
 
-				$result= pg_query($db,"SELECT nextval ('aktivitaetSeq')");   // Eine neue ID für den Datensatz wird geliefert
-				while($row=pg_fetch_assoc($result)){					// |
-					$aktivitaetSequenceNr = $row['nextval'];					// |
-				}														// |
+$result= pg_query($db,"SELECT nextval ('aktivitaetSeq')");   // Eine neue ID für den Datensatz wird geliefert
+while($row=pg_fetch_assoc($result)){					// |
+$aktivitaetSequenceNr = $row['nextval'];					// |
+}														// |
 
 
-				$attributeInsert="";	//  Die Attribute für das INSERT-Statement werden hier abgespeichert
-				$valuesInsert="";		//  Die Werte der einzelnen Attribute werden hier abgespeichert
-				foreach ($attributeAktivitaet as $key => $val) {
-					if ($key == 0){
-						$attributeInsert	= $attributeInsert .$val .							","	;  	// ...., attribute1, attribute2, ...			
-						$valuesInsert 		= $valuesInsert .	$aktivitaetSequenceNr .				","	;	// Anhängen der Werte: Hier die neue ID	
-					}elseif ($key <= 3){
-						$attributeInsert	= $attributeInsert.$val.							","	;	// Anhängen mit , als Separationszeichen
-						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'".		","	;   // | 
-					}elseif($key==4){
-						$attributeInsert	= $attributeInsert.$val									;	// Letztes/r Attribut/Wert daher ohne Komma	
-						$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'"			;   // anhängen
-					}
-				}
-				$insert = "INSERT INTO aktivitaet (".$attributeInsert.") VALUES (".$valuesInsert .")"	;	// Erstellen des gesamten INSERT-Statement
+$attributeInsert="";	//  Die Attribute für das INSERT-Statement werden hier abgespeichert
+$valuesInsert="";		//  Die Werte der einzelnen Attribute werden hier abgespeichert
+foreach ($attributeAktivitaet as $key => $val) {
+if ($key == 0){
+$attributeInsert	= $attributeInsert .$val .							","	;  	// ...., attribute1, attribute2, ...			
+$valuesInsert 		= $valuesInsert .	$aktivitaetSequenceNr .				","	;	// Anhängen der Werte: Hier die neue ID	
+}elseif ($key <= 3){
+$attributeInsert	= $attributeInsert.$val.							","	;	// Anhängen mit , als Separationszeichen
+$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'".		","	;   // | 
+}elseif($key==4){
+$attributeInsert	= $attributeInsert.$val									;	// Letztes/r Attribut/Wert daher ohne Komma	
+$valuesInsert 		= $valuesInsert . "'".$_POST[$val]		."'"			;   // anhängen
+}
+}
+$insert = "INSERT INTO aktivitaet (".$attributeInsert.") VALUES (".$valuesInsert .")"	;	// Erstellen des gesamten INSERT-Statement
 
-				if (pg_query($db,$insert)) {					// Ausführten des INSERT-Statements 
-				}else {
-					print_r( "Data entry unsuccessful. ")	;	// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
-					print_r(pg_last_error($db))				;   // |
-				}
-			}
-			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-*/
+if (pg_query($db,$insert)) {					// Ausführten des INSERT-Statements 
+}else {
+print_r( "Data entry unsuccessful. ")	;	// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
+print_r(pg_last_error($db))				;   // |
+}
+}
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+ */
 
-			// Editieren/Ändern eines Datensatzes ------------------------------------------------------------------------
-			if(	array_key_exists('action',$_POST) && $_POST["action"] == 3){		//	Ändern eines Datensatzes
-				$attributeUpdate=""	;												// Attribut-Zeichenkette für das Update-Statement
-				$valuesUpdate=""	;												// Value-Zeichenkette für das Update-Statement					
-				foreach ($attributeAktivitaet as $key => $val) {
-					$POSTbuffer= $_POST[$val];
-					if (	($val == "jahrz1") ||
-							($val == "jahrz2") ||
-							($val == "jahrz3") ||
-							($val == "jahrz4") 
-						){
-							if (		$POSTbuffer == 'ja'){
+// Editieren/Ändern eines Datensatzes ------------------------------------------------------------------------
+if(	array_key_exists('action',$_POST) && $_POST["action"] == 3){		//	Ändern eines Datensatzes
+		$attributeUpdate=""	;												// Attribut-Zeichenkette für das Update-Statement
+		$valuesUpdate=""	;												// Value-Zeichenkette für das Update-Statement					
+		foreach ($attributeAktivitaet as $key => $val) {
+				$POSTbuffer= $_POST[$val];
+				if (	($val == "jahrz1") ||
+								($val == "jahrz2") ||
+								($val == "jahrz3") ||
+								($val == "jahrz4") 
+				   ){
+						if (		$POSTbuffer == 'ja'){
 								$POSTbuffer = 't'	; 
-							}elseif (	$POSTbuffer == 'nein'){
+						}elseif (	$POSTbuffer == 'nein'){
 								$POSTbuffer = 'f'	; 
-							}else{
+						}else{
 								print_r('FEHLER: Es wurde weder "ja" noch nein bei den Jahreszeiten eingegeben!!!');
-							}
-										}else{
-										
-											$SpeicherDefaultWerte[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
-										}
+						}
+				}else{
 
-					if ($key == 0){													// Bei key == 0 keine Einträge, das die ID nicht verändert wird
-					}elseif ($key <= 14){
+						$SpeicherDefaultWerte[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
+				}
+
+				if ($key == 0){													// Bei key == 0 keine Einträge, das die ID nicht verändert wird
+				}elseif ($key <= 14){
 						$attributeUpdate	= $attributeUpdate.$val.							","	;	// Attribte  kommasepariert		
 						$valuesUpdate 		= $valuesUpdate . "'" . $POSTbuffer		."'".		","	;	// Values kommasepariert
-					}elseif($key==15){
+				}elseif($key==15){
 						$attributeUpdate	= $attributeUpdate.$val									;	// Letztes/r Attribute/Value ohne Komma		
 						$valuesUpdate 		= $valuesUpdate . "'". $POSTbuffer		."'"			;	// |
-					}
 				}
+		}
 
 
 
-				$update = "	UPDATE 	aktivitaet 									
-							SET 	(".$attributeUpdate.") 
-							= 		(".$valuesUpdate .")
-							WHERE	ak_id=" .$_POST['ak_id']. "
-							;"	;											// Zusammenstellen des Update-Statement	
+		$update = "	UPDATE 	aktivitaet 									
+				SET 	(".$attributeUpdate.") 
+				= 		(".$valuesUpdate .")
+				WHERE	ak_id=" .$_POST['ak_id']. "
+				;"	;											// Zusammenstellen des Update-Statement	
 				$note = pg_query($db,$update)	;							// Ausführen des UPDATE-Statement	
 
-				if (pg_query($db,$update)) {
-				}else {
-					print_r( "Data entry unsuccessful. ");					// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
-					print_r(pg_last_error($db)); 							// |
-				}
-			}
-			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		if (pg_query($db,$update)) {
+		}else {
+				print_r( "Data entry unsuccessful. ");					// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
+				print_r(pg_last_error($db)); 							// |
+		}
+}
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 /*
-			//ACHTUNG: Hier wird nur ein Datensatz geliefert, auch wenn der Schüler an mehreren Aktivitaeten teilgenommen hat
+//ACHTUNG: Hier wird nur ein Datensatz geliefert, auch wenn der Schüler an mehreren Aktivitaeten teilgenommen hat
 
-			if(	!array_key_exists('select',$_GET) ){
-				$where = "";
-			}elseif (array_key_exists('select', $_GET) && array_key_exists('ak_id',$_GET) ){ // Aufruf von aktivitaet.php durch schueler.php
-				$where = "WHERE f.ak_id =".$_GET['ak_id'];
-			}
-*/
-			// --->  Verhinderung von Fehlermeldungen ---------------------------------------------------------
+if(	!array_key_exists('select',$_GET) ){
+$where = "";
+}elseif (array_key_exists('select', $_GET) && array_key_exists('ak_id',$_GET) ){ // Aufruf von aktivitaet.php durch schueler.php
+$where = "WHERE f.ak_id =".$_GET['ak_id'];
+}
+ */
+// --->  Verhinderung von Fehlermeldungen ---------------------------------------------------------
 
-			if(array_key_exists('sort',$_GET)){
-				$schalter = $_GET['sort'];
-			}else{
-				$schalter="";
-			}
+if(array_key_exists('sort',$_GET)){
+		$schalter = $_GET['sort'];
+}else{
+		$schalter="";
+}
 
-			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-			
-			// ---> Erweiterung der SELECT-Anweisung: Abhängig vom Modus -------------------------------------
-			// MODUS 1 --------------------------------------------------------------------------------------------------------------------------------
-			if 		(	(array_key_exists('modus'	,$_GET) 	&& $_GET['modus'] 		== 1) ||  
-						(array_key_exists('modus'	,$_GET) 	&& $_GET['modus'] 		== 7) ||
-						(array_key_exists('action'	,$_POST) 	&& $_POST['action'] 	== 3)
-					){	// Zeige alle Datensätze
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-				$where = 'WHERE ak.anbietr = an.an_id';								
+// ---> Erweiterung der SELECT-Anweisung: Abhängig vom Modus -------------------------------------
+// MODUS 1 --------------------------------------------------------------------------------------------------------------------------------
+if 		(	(array_key_exists(	'modus'	,$_GET) 	&& $_GET['modus'] 		== 1) ||  
+			(array_key_exists(	'modus'	,$_GET) 	&& $_GET['modus'] 		== 7) ||
+			(array_key_exists(	'action',$_POST) 	&& $_POST['action'] 	== 3) ||
+			(array_key_exists(	'action',$_POST) 	&& $_POST['action'] 	== 9)
+		){	// Zeige alle Datensätze
 
-			// MODUS 2 --------------------------------------------------------------------------------------------------------------------------------
-			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 2){	// Öffne Suchfenster und zeige alle Datensäte
+		$on = "ON ak.anbietr = an.an_id";								
 
-				$suchfenster 	= 1		;					// 1 -> Suchfenster wird geöffnet
-				$where = 'WHERE ak.anbietr = an.an_id';								
-				
-			// MODUS 3 --------------------------------------------------------------------------------------------------------------------------------
-			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 3){	// Öffne Suchfenster und zeigt die selektierten Datensätze
+		// MODUS 2 --------------------------------------------------------------------------------------------------------------------------------
+}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 2){	// Öffne Suchfenster und zeige alle Datensäte
 
-				$suchfenster = 1										;	// 1 -> Suchfenster wird geöffnet
-				if (is_numeric($_POST["ak_id_input"])){						// Anführungsstriche werden entfernt
-					$ak_id = $_POST["ak_id_input"]						;	// ???
-				}else{
-					$ak_id = $_POST["ak_id"]								;
-				}
-				$where = 'WHERE ak_id'.$_POST["ak_id_operator"] . $ak_id	;	// Erstellen des WHERE-Clause -> WHERE ak_id [>|>=|= usw]
-				
-				
-			// MODUS 4 --------------------------------------------------------------------------------------------------------------------------------
-			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 4){	//	Das Skript aktivitaet.php wurde vom Skript aktivitaeten au
-															//  aufgerufen. aktivitaet.php zeigt jetzt nur die aktivitaeten zur
-															//  übergebenen aktivitaeten_id an. 
+		$suchfenster 	= 1		;					// 1 -> Suchfenster wird geöffnet
+		$where = 'WHERE ak.anbietr = an.an_id';								
 
-				$where = 'WHERE ak.anbietr = an.an_id AND
-								ak.ak_id IN (
-											SELECT 		ak_id 
-											FROM 	 	wirdangeboten	
-											WHERE		f_id ='. $_GET["f_id"].'
-										)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
-				
-			// MODUS 5 --------------------------------------------------------------------------------------------------------------------------------
-			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 5){		// Hinzufügen eines Datensatzes			
+		// MODUS 3 --------------------------------------------------------------------------------------------------------------------------------
+}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 3){	// Öffne Suchfenster und zeigt die selektierten Datensätze
 
-				$suchfenster = 0	;						// Es wird kein Suchfenster geöffnet
-				$where = ''			;						// Alle Datensätze werden angezeigt
-
-			// MODUS 8 MAP ----------------------------------------------------------------------------------------------------------------------------
-			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 8){		//	Das Skript aktivitaet.php wurde vom Skript  fahrt.php
-															//  aufgerufen. aktivitaet.php zeigt jetzt nur die Aktivitaeten zur
-															//  übergebenen f_id an. 
-
-				$suchfenster = 0									;
-				$where = 'WHERE ak.anbietr = an.an_id AND 
-								ak.ak_id NOT IN (
-											SELECT 		ak_id 
-											FROM 		wirdangeboten
-											WHERE		f_id ='. $_GET["f_id"].'
-										)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
-
-			// MODUS 9 DELETE --------------------------------------------------------------------------------------------------------------------------
-			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 9){		//	Das Skript aktivitaet.php wurde vom Skript fahrt.php 
-															//  aufgerufen. aktivitaet.php zeigt jetzt nur die Aktivitaet an
-															//  die zur übergebenen f_id gehören
-
-				$suchfenster = 0									;
-				$where = 'WHERE ak.ak_id  IN (
-											SELECT 		ak_id 
-											FROM 		wirdangeboten
-											WHERE		f_id ='. $_GET["f_id"].'
-										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
-				
-			// ACTION 2 UPDATE --------------------------------------------------------------------------------------------------------------------------
-			}elseif (array_key_exists('action',$_POST) && $_POST['action'] == 2){ // Der zu editieren Datensatz wird kein zweites Mal angezeigt
-
-				$suchfenster = 0									;
-				$where = 'WHERE ak.anbietr = an.an_id AND ak.ak_id != '. $_POST["editieren"];   // Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
-			}
-
-			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		$suchfenster = 1										;	// 1 -> Suchfenster wird geöffnet
+		if (is_numeric($_POST["ak_id_input"])){						// Anführungsstriche werden entfernt
+				$ak_id = $_POST["ak_id_input"]						;	// ???
+		}else{
+				$ak_id = $_POST["ak_id"]								;
+		}
+		$where = 'WHERE ak_id'.$_POST["ak_id_operator"] . $ak_id	;	// Erstellen des WHERE-Clause -> WHERE ak_id [>|>=|= usw]
 
 
+		// MODUS 4 --------------------------------------------------------------------------------------------------------------------------------
+}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 4){	//	Das Skript aktivitaet.php wurde vom Skript aktivitaeten au
+		//  aufgerufen. aktivitaet.php zeigt jetzt nur die aktivitaeten zur
+		//  übergebenen aktivitaeten_id an. 
 
-			// Sortiert die Datensätze abhängig vom Attribut aufsteigend -------------------------------
+		$on = 'ON (ak.anbietr = an.an_id) WHERE
+				ak.ak_id IN (
+								SELECT 		ak_id 
+								FROM 	 	wirdangeboten	
+								WHERE		f_id ='. $_GET["f_id"].'
+							)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 
-			if ($schalter != ""){
-				if($schalter == "an_name"){
-					$result = pg_query($db,
-											"	SELECT 				ak.ak_id , 	ak.bewert	, ak.bezng 	, ak.art 	, ak.katgrie,
-																	ak.fabezg,	ak.ort		, ak.vorstzg, ak.jahrz1	, ak.jahrz2	,
-																	ak.jahrz3,	ak.jahrz4	, ak.mialt	, ak.dauer	, ak.akpreis, 
-																	an.an_name
-												FROM 				aktivitaet ak, anbieter an
-												WHERE				ak.anbietr=an.an_id
-												ORDER BY			an.an_name
-												;
+		// MODUS 5 --------------------------------------------------------------------------------------------------------------------------------
+}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 5){		// Hinzufügen eines Datensatzes			
+
+		$suchfenster = 0	;						// Es wird kein Suchfenster geöffnet
+		$where = ''			;						// Alle Datensätze werden angezeigt
+
+		// MODUS 8 MAP ----------------------------------------------------------------------------------------------------------------------------
+}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 8){		//	Das Skript aktivitaet.php wurde vom Skript  fahrt.php
+		//  aufgerufen. aktivitaet.php zeigt jetzt nur die Aktivitaeten zur
+		//  übergebenen f_id an. 
+
+		$suchfenster = 0									;
+		$on = 'ON (ak.anbietr = an.an_id) WHERE 
+				ak.ak_id NOT IN (
+								SELECT 		ak_id 
+								FROM 		wirdangeboten
+								WHERE		f_id ='. $_GET["f_id"].'
+								)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+
+		// MODUS 9 DELETE --------------------------------------------------------------------------------------------------------------------------
+}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 9){		//	Das Skript aktivitaet.php wurde vom Skript fahrt.php 
+		//  aufgerufen. aktivitaet.php zeigt jetzt nur die Aktivitaet an
+		//  die zur übergebenen f_id gehören
+
+		$suchfenster = 0									;
+		$on = 'ON (ak.anbietr = an.an_id) WHERE ak.ak_id  IN (
+						SELECT 		ak_id 
+						FROM 		wirdangeboten
+						WHERE		f_id ='. $_GET["f_id"].'
+						)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+
+		// ACTION 2 UPDATE --------------------------------------------------------------------------------------------------------------------------
+}elseif (array_key_exists('action',$_POST) && $_POST['action'] == 2){ // Der zu editieren Datensatz wird kein zweites Mal angezeigt
+
+		$suchfenster = 0									;
+		$on = 'ON ak.anbietr = an.an_id  WHERE ak.ak_id != '. $_POST["editieren"];   // Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+}
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+// Sortiert die Datensätze abhängig vom Attribut aufsteigend -------------------------------
+
+if ($schalter != ""){
+		if($schalter == "an_name"){
+				$result = pg_query($db,
+								"	SELECT 				ak.ak_id , 	ak.bewert	, ak.bezng 	, ak.art 	, ak.katgrie,
+								ak.fabezg,	ak.ort		, ak.vorstzg, ak.jahrz1	, ak.jahrz2	,
+								ak.jahrz3,	ak.jahrz4	, ak.mialt	, ak.dauer	, ak.akpreis, 
+								an.an_name
+								FROM 				aktivitaet ak
+								LEFT OUTER JOIN 	anbieter an
+								ON					ak.anbietr=an.an_id
+								ORDER BY			an.an_name
+								;
 								");
-				}else{
-					$result = pg_query($db,
-											"	SELECT 				ak.ak_id , 	ak.bewert	, ak.bezng 	, ak.art 	, ak.katgrie,
-																	ak.fabezg,	ak.ort		, ak.vorstzg, ak.jahrz1	, ak.jahrz2	,
-																	ak.jahrz3,	ak.jahrz4	, ak.mialt	, ak.dauer	, ak.akpreis, 
-																	an.an_name
-												FROM 				aktivitaet ak, anbieter an
-												WHERE				ak.anbietr=an.an_id
-												ORDER BY			ak." . $schalter . "
-												;
-								");
-
-				}
-			}else{
-					$result = pg_query($db,
-											"	SELECT 				ak.ak_id , 	ak.bewert	, ak.bezng 	, ak.art 	, ak.katgrie,
-																	ak.fabezg,	ak.ort		, ak.vorstzg, ak.jahrz1	, ak.jahrz2	,
-																	ak.jahrz3,	ak.jahrz4	, ak.mialt	, ak.dauer	, ak.akpreis, 
-																	an.an_name
-												FROM 				aktivitaet ak, anbieter an
-												" . $where . "
-												;
+		}else{
+				$result = pg_query($db,
+								"	SELECT 				ak.ak_id , 	ak.bewert	, ak.bezng 	, ak.art 	, ak.katgrie,
+								ak.fabezg,	ak.ort		, ak.vorstzg, ak.jahrz1	, ak.jahrz2	,
+								ak.jahrz3,	ak.jahrz4	, ak.mialt	, ak.dauer	, ak.akpreis, 
+								an.an_name
+								FROM 				aktivitaet ak
+								LEFT OUTER JOIN		anbieter an
+								ON					ak.anbietr=an.an_id
+								ORDER BY			ak." . $schalter . "
+								;
 								");
 
-			}
+		}
+}else{
+		$result = pg_query($db,
+						"	SELECT 				ak.ak_id , 	ak.bewert	, ak.bezng 	, ak.art 	, ak.katgrie,
+						ak.fabezg,	ak.ort		, ak.vorstzg, ak.jahrz1	, ak.jahrz2	,
+						ak.jahrz3,	ak.jahrz4	, ak.mialt	, ak.dauer	, ak.akpreis, 
+						an.an_name
+						FROM 				aktivitaet ak
+						LEFT OUTER JOIN 	anbieter an
+						" . $on . "
+						;
+						");
 
+}
 
-			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+print_r($where);
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 			// Hier stand der SearchBlock siehe Datei SeachFragment.php
 
@@ -645,7 +645,7 @@
 									}
 									
 									if( $value == 'ak_id'){
-										echo '<td class="hellgrau">' . '<a href="fahrt.php?modus=10&ak_id='.$aktivitaetID.'">&#x1f441;</a></td>'; // Link
+										echo '<td class="hellgrau">' . '<a href="fahrt.php?modus=12&ak_id='.$aktivitaetID.'">&#x1f441;</a></td>'; // Link
 									}elseif($value == 'jahrz1' || $value == 'jahrz2' ||  $value == 'jahrz3' ||  $value == 'jahrz4' )
 										if ($row[ $value ] == 't'){
 											echo "<td>ja</td>";

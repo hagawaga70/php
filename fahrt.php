@@ -204,7 +204,7 @@
 				$where = ''			;						// Alle Datensätze werden angezeigt
 
 
-			// ---> Das fahrt.php wird von lehrer.php aufgerufen. lehrer.php übergibt eine lehrerID. Alle Fahrten zur LehrerID werden angezeigt
+			// ---> fahrt.php wird von lehrer.php aufgerufen. lehrer.php übergibt eine lehrerID. Alle Fahrten zur lehrerID werden angezeigt
 			}elseif ($_GET['modus'] == 10){					
 															
 				$suchfenster = 0									;
@@ -212,6 +212,17 @@
 											SELECT 		f_id 
 											FROM 		begleitet	
 											WHERE		l_id ='. $_GET["l_id"].'
+										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+				
+
+			// ---> fahrt.php wird von aktivitaet.php aufgerufen. aktivitaet.php übergibt eine aktivitaetID. Alle Fahrten zur aktivitaetID werden angezeigt
+			}elseif ($_GET['modus'] == 12){					
+															
+				$suchfenster = 0									;
+				$where = 'WHERE f.f_id IN (
+											SELECT 		f_id 
+											FROM 		wirdangeboten	
+											WHERE		ak_id ='. $_GET["ak_id"].'
 										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 				
 			}
