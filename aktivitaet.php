@@ -280,13 +280,31 @@
 				$attributeUpdate=""	;												// Attribut-Zeichenkette für das Update-Statement
 				$valuesUpdate=""	;												// Value-Zeichenkette für das Update-Statement					
 				foreach ($attributeAktivitaet as $key => $val) {
+					$POSTbuffer= $_POST[$val];
+					if (	($val == "jahrz1") ||
+							($val == "jahrz2") ||
+							($val == "jahrz3") ||
+							($val == "jahrz4") 
+						){
+							if (		$POSTbuffer == 'ja'){
+								$POSTbuffer = 't'	; 
+							}elseif (	$POSTbuffer == 'nein'){
+								$POSTbuffer = 'f'	; 
+							}else{
+								print_r('FEHLER: Es wurde weder "ja" noch nein bei den Jahreszeiten eingegeben!!!');
+							}
+										}else{
+										
+											$SpeicherDefaultWerte[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
+										}
+
 					if ($key == 0){													// Bei key == 0 keine Einträge, das die ID nicht verändert wird
-					}elseif ($key <= 3){
+					}elseif ($key <= 14){
 						$attributeUpdate	= $attributeUpdate.$val.							","	;	// Attribte  kommasepariert		
-						$valuesUpdate 		= $valuesUpdate . "'".$_POST[$val]		."'".		","	;	// Values kommasepariert
-					}elseif($key==4){
+						$valuesUpdate 		= $valuesUpdate . "'" . $POSTbuffer		."'".		","	;	// Values kommasepariert
+					}elseif($key==15){
 						$attributeUpdate	= $attributeUpdate.$val									;	// Letztes/r Attribute/Value ohne Komma		
-						$valuesUpdate 		= $valuesUpdate . "'".$_POST[$val]		."'"			;	// |
+						$valuesUpdate 		= $valuesUpdate . "'". $POSTbuffer		."'"			;	// |
 					}
 				}
 
@@ -328,7 +346,10 @@
 			
 			// ---> Erweiterung der SELECT-Anweisung: Abhängig vom Modus -------------------------------------
 			// MODUS 1 --------------------------------------------------------------------------------------------------------------------------------
-			if 		(array_key_exists('modus',$_GET) && $_GET['modus'] == 1){	// Zeige alle Datensätze
+			if 		(	(array_key_exists('modus'	,$_GET) 	&& $_GET['modus'] 		== 1) ||  
+						(array_key_exists('modus'	,$_GET) 	&& $_GET['modus'] 		== 7) ||
+						(array_key_exists('action'	,$_POST) 	&& $_POST['action'] 	== 3)
+					){	// Zeige alle Datensätze
 
 				$where = 'WHERE ak.anbietr = an.an_id';								
 
@@ -336,7 +357,7 @@
 			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 2){	// Öffne Suchfenster und zeige alle Datensäte
 
 				$suchfenster 	= 1		;					// 1 -> Suchfenster wird geöffnet
-				$where 			= ''	;					// -- kein WHERE-Clause 	
+				$where = 'WHERE ak.anbietr = an.an_id';								
 				
 			// MODUS 3 --------------------------------------------------------------------------------------------------------------------------------
 			}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 3){	// Öffne Suchfenster und zeigt die selektierten Datensätze
@@ -397,7 +418,7 @@
 			}elseif (array_key_exists('action',$_POST) && $_POST['action'] == 2){ // Der zu editieren Datensatz wird kein zweites Mal angezeigt
 
 				$suchfenster = 0									;
-				$where = 'WHERE ak.ak_id != '. $_POST["editieren"];   // Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+				$where = 'WHERE ak.anbietr = an.an_id AND ak.ak_id != '. $_POST["editieren"];   // Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 			}
 
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -483,24 +504,6 @@
 						"ak_id" 	=> ""		 ,
 					];
 
-					$SpeicherDefaultWertePuffer= [				// Array zum Speichern der Defaultwerte der Formularelemente (Editieren)
-						"an_name" 	=> ""		 ,
-						"bewert" 	=> ""		 ,
-						"bezng" 	=> ""		 ,
-						"art" 		=> ""		 ,
-						"katgrie" 	=> ""		 ,
-						"fabezg" 	=> ""		 ,
-						"ort" 		=> ""		 ,
-						"vorstzg" 	=> ""		 ,
-						"jahrz1" 	=> ""		 ,
-						"jahrz2" 	=> ""		 ,
-						"jahrz3" 	=> ""		 ,
-						"jahrz4" 	=> ""		 ,
-						"mialt" 	=> ""		 ,
-						"dauer" 	=> ""		 ,
-						"akpreis" 	=> ""		 ,
-						"ak_id" 	=> ""		 ,
-					];
 
 					echo "<table>";
 
@@ -551,10 +554,23 @@
 									$row=pg_fetch_assoc($defaultValuesEdit);
 
 									foreach ($SpeicherDefaultWerte as $key => $val) { 		
-										$SpeicherDefaultWertePuffer[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
-									}
+										if (	($key == "jahrz1") ||
+												($key == "jahrz2") ||
+												($key == "jahrz3") ||
+												($key == "jahrz4") 
+											){
+												if (		$row[ $key ] == 't'){
+													$SpeicherDefaultWerte[$key] = 'ja'; 
+												}else{
+													$SpeicherDefaultWerte[$key] = 'nein'; 
+												}
+										}else{
+										
+											$SpeicherDefaultWerte[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
+										}
+
 								}
-							
+							}
 							echo '<tr>'																		;
 							echo 	'<form name="insert" action="aktivitaet.php" method="POST" >'				;
 							echo		'<td	class= "gelb">'												;
@@ -572,7 +588,7 @@
 								if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 8)){ 	// vormals 5
 									echo 			'<input id="f_id" name="f_id" type="hidden" value="'. $_GET['f_id']. '">'						; // Versteckt	
 								}elseif((array_key_exists(	'action',$_POST) 	&& $_POST["action"] 	== 2)){											// ODER
-									echo 			'<input id="ak_id" name="ak_id" type="hidden" value="'. $SpeicherDefaultWertePuffer['ak_id'] . '">'; // Versteckt	
+									echo 			'<input id="ak_id" name="ak_id" type="hidden" value="'. $SpeicherDefaultWerte['ak_id'] . '">'; // Versteckt	
 								}
 								//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 								
@@ -582,11 +598,11 @@
 								$formInputSize = [					// 
 									"anbietr" 	=>	1		,
 									"bewert" 	=>  1		,
-									"bezng" 	=>  1		,
+									"bezng" 	=>  10		,
 									"art" 		=>	1		,
-									"katgrie" 	=>	1		,
-									"fabezg" 	=>	1		,
-									"ort" 		=>	1		,
+									"katgrie" 	=>	10		,
+									"fabezg" 	=>	10		,
+									"ort" 		=>	10		,
 									"vorstzg" 	=>	1		,
 									"jahrz1" 	=>	1		,
 									"jahrz2" 	=>	1		,
@@ -598,10 +614,11 @@
 									"ak_id" 	=>	1		,
 								];
 											
-								print_r($formInputSize );
-								print_r($attributeAktivitaet);
 								foreach($attributeAktivitaet as $key => $value) {
 									if($value == "an_name"){
+									}elseif($value == "ak_id"){
+										echo 		'<td	class= "gelb">'				;
+										echo 		'</td>'								;
 									}else{
 
 											echo 		'<td	class= "gelb">'											;
@@ -609,7 +626,7 @@
 																	$attributeAktivitaet[ $key ]		.	
 																	'" size="'.$formInputSize[$value]	.
 																	'" value="' 						.
-																	$SpeicherDefaultWertePuffer[ $key ]	. 
+																	$SpeicherDefaultWerte[ $value ]	. 
 																	'"/>'												; 
 											echo 		'</td>'															; 
 									}
