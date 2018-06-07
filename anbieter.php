@@ -11,28 +11,29 @@
 			// GET  modus	1 2 3 4 8 9
 			// POST action  0 1 2 3 5 8 9
 			// ------------------------------------------------------
-			// GET	 modus  7 	Menü->Aktivitaet->Edit/Bearbeiten
+			// #GET	 modus  7 	Menü->Aktivitaet->Edit/Bearbeiten
 			// #POST action 3	Editieren eines Datensatzes
 			// ------------------------------------------------------
-			// GET  modus  1 	Zeige alle Datensätze
+			// #GET  modus  1 	Zeige alle Datensätze
 			// --------------------------------------------------------------------------------------------------------------------------------------
 			// GET  modus  2 	Öffnet das Suchfenster und zeigt  alle Datensätze (NICHT IMPLEMENTIERT)
 			// --------------------------------------------------------------------------------------------------------------------------------------
 			// GET  modus  3 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  (NICHT IMPLEMENTIERT)
 			// POST action 5 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  (NICHT IMPLEMENTIERT)
 			// --------------------------------------------------------------------------------------------------------------------------------------
-			// GET  modus  4   	anbieter.php wird von aktiviteat.php aufgerufen und zeigt alle Aktivitaet, die an einer bestimmten Fahrt teilnehmen 	
+			// #GET  modus  4   	anbieter.php wird von aktiviteat.php mit einer bestimmten ak_id aufgerufen und zeigt den Anbieter der Aktivität
 			// --------------------------------------------------------------------------------------------------------------------------------------
 			//  MAP 
-			// .GET  modus  8   	anbieter.php wird aktiviteat.php aufgerufen. 
+			// #GET  modus  8   	anbieter.php wird aktiviteat.php aufgerufen. 
 			// #POST action 8	A)	Ein bestehender Aktivitaetdatensatz (ak_id) wird mit der f_id in der Relation "wirdangeboten" eingetragen
 			// #POST action 9	B)  Ein neuer Aktivitaetdatensatz wird angelegt. Die ak_id und die f_id werden in der Relation "wirdangeboten" abgespeichert
 			// --------------------------------------------------------------------------------------------------------------------------------------
 			//  DELETE
-			// .GET  modus  9   	anbieter.php wird von aktiviteat.php aufgerufen. 
+			// #GET  modus  9   	anbieter.php wird von aktiviteat.php mit einer bestimmten ak_id aufgerufen. Sofern der dazugehörige Anbieter nur
+			//						ein Event anbietet wird er gelöscht und die anbieter_id im enstrechenden Tuple der Relation aktivität gelöscht
 			// #POST action 1   	Entfernen eines Datensatzes
 			// --------------------------------------------------------------------------------------------------------------------------------------
-			// POST action  2 	Der zu editierende Datensatz wird kein zweites Mal angezeigt
+			// #POST action  2 	Der zu editierende Datensatz wird kein zweites Mal angezeigt
 			// --------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -41,6 +42,7 @@
 			$schalter 		= ""	;  		// Wird benötigt beim Sortieren der Datensätze nach bestimmten Attributen
 			$suchfenster 	= 0		;		// ACHTUNG: Das Suchfenster wurde aus diesem Skript entfernt
 			$on				= ""	;		// Zur Erweiterung von SQL-SELECT-Statements
+			$where			= ""	;		// Zur Erweiterung von SQL-SELECT-Statements
 			// -----------------------------------------------------------------------------------------------------
 			// ---> Array mit den Attributen der Relation "Aktivitaet" -----------------------------------------------
 
@@ -89,7 +91,8 @@
 
 						
 			// -----------------------------------------------------------------------------------------------------
-			// ---> Hinzufügen eines Datensatzes ---------------------------------------------------------------
+			// ---> Hinzufügen eines Datensatzes in "anbieter" und Update eines Tuples in "aktivität" --------------
+
 
 			if(	array_key_exists('action',$_POST) && $_POST["action"] == 9){
 				$result= pg_query($db,"SELECT nextval ('anbieterSeq')");   	// Eine neue ID für den Datensatz wird geliefert
@@ -254,7 +257,8 @@
 
 
 
-				// Editieren/Ändern eines Datensatzes ------------------------------------------------------------------------
+				// Editieren/Ändern eines Datensatzes in der Relation Anbieter-----------------------------------------------
+
 				if(	array_key_exists('action',$_POST) && $_POST["action"] == 3){		// Ändern eines Datensatzes
 						$attributeUpdate=""	;											// Attribut-Zeichenkette für das Update-Statement
 						$valuesUpdate=""	;											// Value-Zeichenkette für das Update-Statement					
@@ -262,7 +266,7 @@
 
 							$SpeicherDefaultWerte[$key] = $row[$key];			// Ablegen der Defaultwerte in einem Pufferarray
 
-								if ($key == 9){													// Bei key == 9 keine Einträge, das die ID nicht verändert wird
+								if ($key == 9){													// Bei key == 9 keine Einträge, da die ID nicht verändert wird
 								}elseif ($key <= 7){
 										$attributeUpdate	= $attributeUpdate.$val.							","	;	// Attribute  kommasepariert		
 										$valuesUpdate 		= $valuesUpdate . "'" . $_POST[$val]		."'".		","	;	// Values kommasepariert
@@ -279,7 +283,7 @@
 								= 		(".$valuesUpdate .")
 								WHERE	an_id=" .$_POST['an_id']. "
 								;"	;											// Zusammenstellen des Update-Statement	
-								$note = pg_query($db,$update)	;							// Ausführen des UPDATE-Statement	
+								$note = pg_query($db,$update)	;				// Ausführen des UPDATE-Statement	
 						
 						if (pg_query($db,$update)) {
 						}else {
@@ -304,13 +308,13 @@
 						$where = "";								
 
 						// MODUS 2 --------------------------------------------------------------------------------------------------------------------------------
-				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 2){	// Öffne Suchfenster und zeige alle Datensäte
+				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 2){	// Öffne Suchfenster und zeige alle Datensäte NICHT UMGESETZT
 
 						$suchfenster 	= 1		;					// 1 -> Suchfenster wird geöffnet
 						$where = 'WHERE ak.anbietr = an.an_id';								
 
 						// MODUS 3 --------------------------------------------------------------------------------------------------------------------------------
-				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 3){	// Öffne Suchfenster und zeigt die selektierten Datensätze
+				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 3){	// Öffne Suchfenster und zeigt die selektierten Datensätze NICHT UMGESETZT
 
 						$suchfenster = 1										;	// 1 -> Suchfenster wird geöffnet
 						if (is_numeric($_POST["ak_id_input"])){						// Anführungsstriche werden entfernt
@@ -328,13 +332,13 @@
 
 
  
-				}elseif ( 	(array_key_exists('action'	, $_POST) 	&& $_POST[	"action"] 	== 8) ||	// SELECT: Verbinde bestehenden ak_id mit f_id
+				}elseif ( 	(array_key_exists('action'	, $_POST) 	&& $_POST[	"action"] 	== 8) ||	// SELECT: Verbinde bestehende ak_id mit f_id
 							(array_key_exists('action'	, $_POST) 	&& $_POST[	'action'] 	== 1) 		// DELETE		
 
 						){					//	anbieter.php wurde vom aktiviteat.php
-											//  aufgerufen. anbieter.php zeigt jetzt nur die Aktivitaeten zur
-											//  übergebenen f_id an. 
-
+											//  aufgerufen. anbieter.php zeigt jetzt nur die Anbieter zur
+											//  übergebenen ak_id an. 
+/*
 							if(		array_key_exists('f_id'   , $_POST )) {
 								$f_id = $_POST["f_id"];
 							}elseif(	array_key_exists('f_id'   , $_GET ))		{ 
@@ -347,14 +351,16 @@
 												FROM 	 	wirdangeboten	
 												WHERE		f_id ='. $f_id .'
 											)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
-
+*/
 
 						// MODUS 8 MAP ----------------------------------------------------------------------------------------------------------------------------
 				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 8){		//	Das Skript anbieter.php wurde vom Skript  aktiviteat.php
 						//  aufgerufen. anbieter.php zeigt jetzt nur die Aktivitaeten zur
 						//  übergebenen f_id an. 
 
-			/*			$suchfenster = 0									;
+						$suchfenster = 0;
+						$where = "";
+			/*
 						$on = 'ON (ak.anbietr = an.an_id) WHERE 
 								ak.ak_id NOT IN (
 												SELECT 		ak_id 
@@ -363,7 +369,7 @@
 												)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 			*/
 
-						// MODUS 9 DELETE: Alle zu einer f_id gehörenden Datensätze werden angezeigt---------------------------------------------------------------
+						// MODUS 9 DELETE: Alle zu einer ak_id gehörenden Datensätze werden angezeigt---------------------------------------------------------------
 				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 9){		//	Das Skript anbieter.php wurde vom Skript aktiviteat.php 
 						//  aufgerufen. anbieter.php zeigt jetzt nur die Aktivitaet an
 						//  die zur übergebenen f_id gehören
@@ -395,7 +401,7 @@
 				}
 
 
-				if ($schalter != ""){
+				if ($schalter != ""){  // Datensätze werden nach dem jeweiligen Attribut sortiert
 						$result = pg_query($db,
 										"	SELECT 	an_id,an_name,strasse,hausnr,ort,plz,url,email,telefon,ansprechperson
 											FROM 	anbieter 
@@ -506,7 +512,7 @@
 								echo '<tr>'																		;
 								echo 	'<form name="insert" action="anbieter.php" method="POST" >'				;
 
-																	$formInputSize = [					// 
+										$formInputSize = [					// Legt die Größe der Input-Fenster fest
 										"an_name"	   	=> 10 		,
 										"strasse"	   	=> 10 		,
 										"hausnr"		=>	3		,
