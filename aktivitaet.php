@@ -498,8 +498,12 @@
 
 												echo '<th class="grau">'. $value ."</th>";					// |
 
-										}else{																// |
-												echo '<th class="grau" >' . '<a href="aktivitaet.php?sort='.$key.'">'. $value ."</a></th>";	// |
+										}else{
+												if($key == 'anbietr'){
+													echo '<th colspan="3" class="grau" >' . '<a href="aktivitaet.php?sort='.$key.'">'. $value ."</a></th>";	// |
+												}else{
+													echo '<th class="grau" >' . '<a href="aktivitaet.php?sort='.$key.'">'. $value ."</a></th>";	// |
+												}
 										}
 									}
 								
@@ -630,16 +634,28 @@
 										if($value == 'ak_id') {						// Zum Aufrufen anderer Skripte wird die ak_id benötigt
 											$aktivitaetID = $row[ $value ]; 
 										}
-										
+									}
+									foreach ($attributeAktivitaet as $value)	{
 										if( $value == 'ak_id'){
 											echo '<td class="hellgrau">' . '<a href="fahrt.php?modus=12&ak_id='.$aktivitaetID.'">&#x1f441;</a></td>'; // Link
-										}elseif($value == 'jahrz1' || $value == 'jahrz2' ||  $value == 'jahrz3' ||  $value == 'jahrz4' )
+										}elseif($value == 'jahrz1' || $value == 'jahrz2' ||  $value == 'jahrz3' ||  $value == 'jahrz4' ){
 											if ($row[ $value ] == 't'){
 												echo "<td>ja</td>";
 											}else{
 												echo "<td>nein</td>";
 											}
-										else{
+										}elseif($value== 'an_name'){
+											if ($row[ $value] == ''){
+											 	echo '<td class="grau"></td>';   // Link
+	                                         	echo '<td class="grau">' . '<a href="anbieter.php?modus=8&ak_id='.$aktivitaetID .'">&#x2795;</a></td>';    // Link
+	    	                                 	echo '<td class="grau"></td>';    // Link
+											}else{
+												echo '<td class="grau">' . '<a href="anbieter.php?modus=4&ak_id='.$aktivitaetID .'">&#x1f441;</a></td>';   // Link
+	                                         	echo '<td class="grau">' .  $row[ $value ] .'</td>';    // Link
+	    	                                 	echo '<td class="grau">' . '<a href="anbieter.php?modus=9&ak_id='.$aktivitaetID .'">&#x2796;</a></td>';    // Link
+											}
+	
+										}else{
 											echo "<td>" . $row[ $value] . "</td>";
 										}
 							
