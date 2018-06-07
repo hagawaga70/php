@@ -372,6 +372,15 @@
 												)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 
 						// MODUS 9 DELETE: Alle zu einer f_id gehörenden Datensätze werden angezeigt---------------------------------------------------------------
+				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 12){		//	Das Skript aktivitaet.php wurde vom Skript fahrt.php 
+						$on = 'ON (ak.anbietr = an.an_id) WHERE ak.ak_id  IN (
+										SELECT 		ak_id 
+										FROM 		aktivitaet
+										WHERE		anbietr ='. $_GET["anbietr"].'
+										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+
+
+
 				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 9){		//	Das Skript aktivitaet.php wurde vom Skript fahrt.php 
 						//  aufgerufen. aktivitaet.php zeigt jetzt nur die Aktivitaet an
 						//  die zur übergebenen f_id gehören
@@ -496,7 +505,11 @@
 
 										}elseif(array_key_exists('modus',$_GET) && $_GET['modus']==4){		// |
 
-												echo '<th class="grau">'. $value ."</th>";					// |
+											if($key == 'anbietr'){
+												echo '<th colspan="3" class="grau">'. $value ."</th>";					// |
+											}else{
+												echo '<th class="grau" >' . '<a href="aktivitaet.php?sort='.$key.'">'. $value ."</a></th>";	// |
+											}
 
 										}else{
 												if($key == 'anbietr'){
@@ -564,7 +577,17 @@
 								}
 								echo '<tr>'																		;
 								echo 	'<form name="insert" action="aktivitaet.php" method="POST" >'				;
-								echo		'<td	class= "gelb">'												;
+
+								if(	(array_key_exists(	'modus',$_GET) 		&& $_GET["modus"] 	== 2) ||
+									(array_key_exists(	'modus',$_GET) 		&& $_GET["modus"] 	== 8) ||
+									(array_key_exists(	'action',$_POST) 	&& $_POST["action"] == 2)
+									
+									){						
+									echo		'<td	colspan="3" class= "gelb">'												;
+								}else{
+									echo		'<td	class= "gelb">'												;
+									
+								}
 
 									// ---> Wählen des passenden Submit-Button [ADD|Update] ---------------------------------------------------------------------
 									if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 8)){ 	// ADD

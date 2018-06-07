@@ -170,7 +170,8 @@
 
 
 			// -----------------------------------------------------------------------------------------------------
-			// --> Löchen einer Verbindung (Relation: wirdangeboten) zwischen einer Fahrt(Relation: fahrt) und einem Aktivitaet (Relation:Aktivitaet)
+			// --> Löchen der anbietr ID in aktivitaet und ggf. löschen de Datensatzes in der Relation Anbieter. 
+			//     Der Datensatz wird nur gelöscht, wenn in "aktivitaet" die anbietr ID kein zweites Mal vorhanden ist. 
 
 				if(	array_key_exists('action',$_POST) && $_POST["action"] == 1){
 
@@ -353,13 +354,14 @@
 						//  aufgerufen. anbieter.php zeigt jetzt nur die Aktivitaeten zur
 						//  übergebenen f_id an. 
 
-						$suchfenster = 0									;
+			/*			$suchfenster = 0									;
 						$on = 'ON (ak.anbietr = an.an_id) WHERE 
 								ak.ak_id NOT IN (
 												SELECT 		ak_id 
 												FROM 		wirdangeboten
 												WHERE		f_id ='. $_GET["f_id"].'
 												)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+			*/
 
 						// MODUS 9 DELETE: Alle zu einer f_id gehörenden Datensätze werden angezeigt---------------------------------------------------------------
 				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 9){		//	Das Skript anbieter.php wurde vom Skript aktiviteat.php 
@@ -573,7 +575,7 @@
 										}
 										
 										if( $value == 'an_id'){
-											echo '<td class="hellgrau">' . '<a href="aktiviteat.php?modus=12&ak_id='.$anbieterID.'">&#x1f441;</a></td>'; // Link
+											echo '<td class="hellgrau">' . '<a href="aktivitaet.php?modus=12&anbietr='.$anbieterID.'">&#x1f441;</a></td>'; // Link
 										}else{
 											echo "<td>" . $row[ $value] . "</td>";
 										}
