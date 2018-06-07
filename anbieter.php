@@ -45,22 +45,16 @@
 			// ---> Array mit den Attributen der Relation "Aktivitaet" -----------------------------------------------
 
 			$attributeAktivitaet = [							
-    			0	=> "an_name"	,
-    			1	=> "bewert"		,
-    			2	=> "bezng"		,
-    			3	=> "art"		,
-    			4	=> "katgrie"	,
-    			5	=> "fabezg"		,
-    			6	=> "ort"		,
-    			7	=> "vorstzg"	,
-    			8	=> "jahrz1"		,
-    			9	=> "jahrz2"		,
-    			10	=> "jahrz3"		,
-    			11	=> "jahrz4"		,
-    			12	=> "mialt"		,
-    			13	=> "dauer"		,
-    			14	=> "akpreis"	,
-    			15	=> "ak_id"		,
+    			0	=> "an_id"		,
+    			1	=> "an_name"	,
+    			2	=> "strasse"	,
+    			3	=> "hausnr"		,
+    			4	=> "ort"		,
+    			5	=> "plz"		,
+    			6	=> "url"		,
+    			7	=> "email"		,
+    			8	=> "telefon"	,
+    			9	=> "ansprechperson"		,
 			];
 
 
