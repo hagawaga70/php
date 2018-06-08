@@ -110,7 +110,7 @@
 											$_POST["errbar"		]								."',"	.
 											$_POST["kosten"		]								.","	.
 											$_POST["entfkern"	]								.","	.
-											NULL												.");";	
+											"1"												.");";	
 
 
 
@@ -154,7 +154,7 @@
 			// -----------------------------------------------------------------------------------------------------
 			// --> Löchen einer Verbindung zwischen einer Fahrt(Relation: fahrt) und einem Unterkunft (Relation:Unterkunft)
 
-				if(	array_key_exists(
+				if(array_key_exists('action',$_POST) && $_POST["action"] == 1){
 						$errorSwitch=true;	
 
 						if (pg_query($db,"BEGIN TRANSACTION;")) { 		// Da in zwei Relationen Veränderungen durchgeführt werden müssen. 
@@ -471,14 +471,14 @@
 										}elseif(array_key_exists('modus',$_GET) && $_GET['modus']==4){		// |
 
 											if($key == 'u_ort'){
-												echo '<th colspan="3" class="grau">'. $value ."</th>";					// |
+												echo '<th colspan="2" class="grau">'. $value ."</th>";					// |
 											}else{
 												echo '<th class="grau" >' . '<a href="unterkunft.php?sort='.$key.'">'. $value ."</a></th>";	// |
 											}
 
 										}else{
 												if($key == 'u_ort'){
-													echo '<th colspan="3" class="grau" >' . '<a href="unterkunft.php?sort='.$key.'">'. $value ."</a></th>";	// |
+													echo '<th colspan="2" class="grau" >' . '<a href="unterkunft.php?sort='.$key.'">'. $value ."</a></th>";	// |
 												}else{
 													echo '<th class="grau" >' . '<a href="unterkunft.php?sort='.$key.'">'. $value ."</a></th>";	// |
 												}
@@ -577,7 +577,19 @@
 									foreach($attributeUnterkunft as $key => $value) {
 										if($value == "u_id"){
 										}elseif($value == "u_ort"){
-											echo 		'<td	colspan=3 class= "gelb">'				;
+
+											echo 		'<td	colspan="2" class= "gelb">
+
+																<input type="text" name="u_ort" size="'.$formInputSize[$value].'"';
+
+											echo				'<select name="f_id_operator">'											;
+											echo '					<option>---				</option>'									;
+											foreach ($operator as $key => $val) {	
+												echo '				<option >'.$val.'</option>'									;
+											}
+											echo		'/>'; 
+
+
 											echo 		'</td>'								;
 										}else{
 
@@ -608,15 +620,16 @@
 										if( $value == 'u_id'){
 											echo '<td class="hellgrau">' . '<a href="fahrt.php?modus=14&u_id='.$unterkunftID.'">&#x1f441;</a></td>'; // Link
 										}elseif($value== 'u_ort'){
-											if ($row[ $value] == ''){
-											 	echo '<td class="grau"></td>';   // Link
-	                                         	echo '<td class="grau">' . '<a href="ort.php?modus=8&u_id='.$unterkunftID .'">&#x2795;</a></td>';    // Link
-	    	                                 	echo '<td class="grau"></td>';    // Link
-											}else{
-												echo '<td class="grau">' . '<a href="ort.php?modus=4&u_id='.$unterkunftID .'">&#x1f441;</a></td>';   // Link
-	                                         	echo '<td class="grau">' .  $row[ $value ] .'</td>';    // Link
-	    	                                 	echo '<td class="grau">' . '<a href="ort.php?modus=9&u_id='.$unterkunftID .'">&#x2796;</a></td>';    // Link
-											}
+										//	if ($row[ $value] == ''){
+										//	 	echo '<td class="grau"></td>';   // Link
+	                                         	echo '<td class="grau">' .  $row[ 'o_name' ] .'</td>';    // Link
+	                                         	echo '<td class="grau">' . '<a href="ort.php?modus=4&u_id='.$unterkunftID .'">&#x1f441;</a></td>';    // Link
+	    	                           //     	echo '<td class="grau"></td>';    // Link
+										//	}else{
+										//		echo '<td class="grau">' . '<a href="ort.php?modus=4&u_id='.$unterkunftID .'">&#x1f441;</a></td>';   // Link
+	                                   //      	echo '<td class="grau">' .  $row[ $value ] .'</td>';    // Link
+	    	                          //       	echo '<td class="grau">' . '<a href="ort.php?modus=9&u_id='.$unterkunftID .'">&#x2796;</a></td>';    // Link
+									//		}
 	
 										}else{
 											echo "<td>" . $row[ $value] . "</td>";
