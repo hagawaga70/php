@@ -110,8 +110,7 @@
 											$_POST["errbar"		]								."',"	.
 											$_POST["kosten"		]								.","	.
 											$_POST["entfkern"	]								.","	.
-											$_POST["u_ort"		]								.","	.
-											$_POST["akpreis"]									.");";	
+											NULL												.");";	
 
 
 
@@ -155,8 +154,7 @@
 			// -----------------------------------------------------------------------------------------------------
 			// --> Löchen einer Verbindung zwischen einer Fahrt(Relation: fahrt) und einem Unterkunft (Relation:Unterkunft)
 
-				if(	array_key_exists('action',$_POST) && $_POST["action"] == 1){
-
+				if(	array_key_exists(
 						$errorSwitch=true;	
 
 						if (pg_query($db,"BEGIN TRANSACTION;")) { 		// Da in zwei Relationen Veränderungen durchgeführt werden müssen. 
@@ -168,7 +166,7 @@
 						}
 
 						$nullUpdate =   "   UPDATE  fahrt 
-											SET     u_id = NULL
+											SET     f_unterkunft = NULL
 											WHERE   f_id   = " .$_POST['f_id']. ";"
 										;
 
@@ -186,7 +184,7 @@
 								WHERE	u_id=".$_POST['loeschen']."
 								AND		0 = (	SELECT 	count(*) 
 												FROM	fahrt
-												WHERE	u_id = ".$_POST['loeschen']."); "
+												WHERE	f_unterkunft = ".$_POST['loeschen']."); "
 								;
 
 
@@ -220,9 +218,9 @@
 
 				if(	array_key_exists('action',$_POST) && $_POST["action"] == 8){
 
-						$selectUpdate = "	Update fahrt
-										 	SET u_id 	= "	.$_POST['auswaehlen']."
-											WHERE f_id 	= "	.$_POST['f_id'].";";
+						$selectUpdate = "	Update 	fahrt
+										 	SET 	f_unterkunft 	= "	.$_POST['auswaehlen']."
+											WHERE 	f_id 			= "	.$_POST['f_id'].";";
 
 
 
@@ -247,10 +245,10 @@
 								if ($key == 0){													// Bei key == 0 keine Einträge, das die ID nicht verändert wird
 								}elseif ($key <= 4){
 										$attributeUpdate	= $attributeUpdate.$val.							","	;	// Attribute  kommasepariert		
-										$valuesUpdate 		= $valuesUpdate . "'" . $POSTbuffer		."'".		","	;	// Values kommasepariert
+										$valuesUpdate 		= $valuesUpdate . "'" . $_POST[$val]	."'".		","	;	// Values kommasepariert
 								}elseif($key==5){
 										$attributeUpdate	= $attributeUpdate.$val									;	// Letztes/r Attribute/Value ohne Komma		
-										$valuesUpdate 		= $valuesUpdate . "'". $POSTbuffer		."'"			;	// |
+										$valuesUpdate 		= $valuesUpdate . "'". $_POST[$val]		."'"			;	// |
 								}
 						}
 
@@ -267,6 +265,7 @@
 						}else {
 								print_r( "Data entry unsuccessful. ");					// Im Falle eines Fehlers erscheint im Brower eine Fehlermeldung
 								print_r(pg_last_error($db)); 							// |
+								print_r($update);
 						}
 				}
 				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -301,9 +300,8 @@
 
 
 						// MODUS 4 --------------------------------------------------------------------------------------------------------------------------------
-				}elseif ( 	(array_key_exists('modus'	, $_GET	) 	&& $_GET[	'modus'	] 	== 4) || 
-							(array_key_exists('action',$_POST) 		&& $_POST[	"action"] 	== 8) ||	// SELECT: Verbinde bestehenden u_id mit f_id
-							(array_key_exists('action'	, $_POST) 	&& $_POST[	'action'] 	== 1) 		// DELETE		
+				}elseif ( 	(array_key_exists('modus',$_GET) 		&& $_GET[	"modus"] 	== 4) ||	 
+							(array_key_exists('action',$_POST) 		&& $_POST[	"action"] 	== 8) 	// SELECT: Verbinde bestehenden u_id mit f_id
 
 						){					//	unterkunft.php wurde vom fahrt.php
 											//  aufgerufen. unterkunft.php zeigt jetzt nur die Unterkünfte zur
@@ -313,28 +311,43 @@
 								$f_id = $_POST["f_id"];
 							}elseif(	array_key_exists('f_id'   , $_GET ))		{ 
 								$f_id = $_GET["f_id"];
-							}	
+							}
+/*	
+							$on = 'ON (f.f_unterkunft = u.u_id) WHERE u.u_id  IN (
+										SELECT 		u_id 
+										FROM 		fahrt
+										WHERE		f_id ='. $_GET["f_id"].'
+										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 
-							$on = 'ON (f.f_unterkunft = u.u_id) WHERE
+*/
+
+							$on = 'ON (u.u_ort = u.u_id) WHERE
 									u.u_id IN (
-												SELECT 		u_id 
+												SELECT 		f_unterkunft
 												FROM 	 	fahrt	
-												WHERE		f_unterkunft ='. $f_id .'
+												WHERE		f_id ='. $f_id .'
 											)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 
 
 						// MODUS 8 MAP ----------------------------------------------------------------------------------------------------------------------------
-				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 8){		//	Das Skript unterkunft.php wurde vom Skript  fahrt.php
+				}elseif (
+							(array_key_exists('modus',$_GET) 		&& $_GET['modus'] 		== 8) ||
+							(array_key_exists('action'	, $_POST) 	&& $_POST[	'action'] 	== 1)	// DELETE		
+						) 	
+						{		//	Das Skript unterkunft.php wurde vom Skript  fahrt.php
 						//  aufgerufen. unterkunft.php zeigt jetzt nur die Unterkünfte zur
 						//  übergebenen f_id an. 
 
 						$suchfenster = 0									;
-						$on = 'ON (f.f_unterkunft = u.u_id) WHERE 
+						$on = 'ON (u.u_ort = o.o_id)'; 
+/*
+						$on = 'ON (u.u_ort = o.o_id) WHERE 
 								u.u_id NOT IN (
 												SELECT 		f_unterkunft
 												FROM 		fahrt
 												WHERE		f_id ='. $_GET["f_id"].'
 												)';											// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+*/
 
 						// MODUS 9 DELETE: Alle zu einer f_id gehörenden Datensätze werden angezeigt---------------------------------------------------------------
 				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 12){		//	Das Skript unterkunft.php wurde vom Skript fahrt.php 
@@ -346,13 +359,13 @@
 
 
 
-				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 9){		//	Das Skript unterkunft.php wurde vom Skript fahrt.php 
+				}elseif ( (array_key_exists('modus',$_GET) && $_GET['modus'] == 9) ){		//	Das Skript unterkunft.php wurde vom Skript fahrt.php 
 						//  aufgerufen. unterkunft.php zeigt jetzt nur die Unterkunft an
 						//  die zur übergebenen f_id gehören
 
 						$suchfenster = 0									;
-						$on = 'ON (f.f_unterkunft = u.u_id) WHERE u.u_id  IN (
-										SELECT 		u_id 
+						$on = 'ON (u.u_ort = o.o_id) WHERE u.u_id  IN (
+										SELECT 		f_unterkunft 
 										FROM 		fahrt
 										WHERE		f_id ='. $_GET["f_id"].'
 										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
@@ -362,7 +375,7 @@
 				}elseif (array_key_exists('action',$_POST) && $_POST['action'] == 2){ // Der zu editieren Datensatz wird kein zweites Mal angezeigt
 
 						$suchfenster = 0									;
-						$on = 'ON f.f_unterkunft = u.u_id  WHERE u.u_id != '. $_POST["editieren"];   // Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+						$on = 'ON u.u_ort = o.o_id  WHERE u.u_id != '. $_POST["editieren"];   // Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 				}
 
 				// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -403,14 +416,14 @@
 
 						}
 				}else{
-						$result = pg_query($db,
-										"	
+						$query ="	
 										SELECT 				u.u_id, u.u_name, u.typ, u.errbar, u.kosten, u.entfkern, o.o_name 
 										FROM 				unterkunft u
 										LEFT OUTER JOIN 	ort o
 										" . $on . "
-										;
-										");
+										;"; 
+						$result = pg_query($db,$query);
+						print_r($query);
 
 				}
 
@@ -435,13 +448,13 @@
 
 						$SpeicherDefaultWerte= [				// Array zum Speichern der Defaultwerte der Formularelemente (Editieren)
 
-								"u_id"	 	=>	"Fahrt"				,
-								"u_name"	=>  "Name"				,
-								"typ"	   	=>  "Typ"				,
-								"errbar"	=>	"Erreichbarkeit"	,
-								"kosten"	=>	"Kosten"			,
-								"entfkern"	=>	"Entfernung"		,
-								"o_name"	=>	"Ort"				,
+								"u_id"	 	=>	""				,
+								"u_name"	=>  ""				,
+								"typ"	   	=>  ""				,
+								"errbar"	=>	""				,
+								"kosten"	=>	""				,
+								"entfkern"	=>	""				,
+								"o_name"	=>	""				,
 						];
 
 
@@ -522,11 +535,13 @@
 									(array_key_exists(	'action',$_POST) 	&& $_POST["action"] == 2)
 									
 									){						
-									echo		'<td	colspan="3" class= "gelb">'												;
+									//echo		'<td	 class= "gelb">'												;
 								}else{
-									echo		'<td	class= "gelb">'												;
+									//echo		'<td	class= "gelb">'												;
 									
 								}
+									echo '<td	class= "gelb">'	;
+									
 
 									// ---> Wählen des passenden Submit-Button [ADD|Update] ---------------------------------------------------------------------
 									if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 8)){ 	// ADD
@@ -551,7 +566,7 @@
 									$formInputSize = [					// 
 
 										"u_id"	 	=>	"10"				,
-										"u_name"	=>  "10"				,
+										"u_name"	=>  "15"				,
 										"typ"	   	=>  "10"				,
 										"errbar"	=>	"10"				,
 										"kosten"	=>	"4"					,
@@ -560,9 +575,9 @@
 									];
 												
 									foreach($attributeUnterkunft as $key => $value) {
-										if($value == "an_name"){
-										}elseif($value == "u_id"){
-											echo 		'<td	class= "gelb">'				;
+										if($value == "u_id"){
+										}elseif($value == "u_ort"){
+											echo 		'<td	colspan=3 class= "gelb">'				;
 											echo 		'</td>'								;
 										}else{
 
@@ -591,7 +606,7 @@
 									}
 									foreach ($attributeUnterkunft as $value)	{
 										if( $value == 'u_id'){
-											echo '<td class="hellgrau">' . '<a href="fahrt.php?modus=12&u_id='.$unterkunftID.'">&#x1f441;</a></td>'; // Link
+											echo '<td class="hellgrau">' . '<a href="fahrt.php?modus=14&u_id='.$unterkunftID.'">&#x1f441;</a></td>'; // Link
 										}elseif($value== 'u_ort'){
 											if ($row[ $value] == ''){
 											 	echo '<td class="grau"></td>';   // Link

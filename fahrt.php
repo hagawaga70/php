@@ -224,6 +224,14 @@
 											FROM 		wirdangeboten	
 											WHERE		ak_id ='. $_GET["ak_id"].'
 										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+			}elseif ($_GET['modus'] == 14){					
+															
+				$suchfenster = 0									;
+				$where = 'WHERE f.f_id IN (
+											SELECT 		f_id 
+											FROM 		fahrt f, unterkunft u	
+											WHERE		f.f_unterkunft ='. $_GET["u_id"].'
+										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 			print_r($where);			
 			}
 
@@ -458,7 +466,7 @@
 
 								foreach ($spaltenBezeichnerFahrt as $key => $value)	{					// Spaltenkopfbezeichner mit und ohne Link
 									if(array_key_exists('select',$_GET) && $_GET['select']==1){			// zum Sortieren der Datensätze
-										if($key == "dummy01" || $key == "dummy02"){
+										if($key == "dummy01" || $key == "dummy02" || $key == "f_unterkunft"){
 											echo '<th class="grau" colspan="3">'. $value ."</th>";		// |
 										}elseif($key == "f_id"){
 											echo '<th class="grau" colspan="3">'. $value ."</th>";		// |
@@ -466,7 +474,7 @@
 											echo '<th class="grau">'. $value ."</th>";					// |
 										}
 									}elseif(array_key_exists('modus',$_GET) && $_GET['modus']==4){		// |
-										if($key == "dummy01" || $key == "dummy02"){
+										if($key == "dummy01" || $key == "dummy02"|| $key == "f_unterkunft"){
 											echo '<th class="grau colspan="3"">'. $value ."</th>";		// |
 										}elseif ($key == "f_id"){
 											echo '<th class="grau colspan="3"">'. $value ."</th>";		// |
@@ -474,7 +482,7 @@
 											echo '<th class="grau">'. $value ."</th>";					// |
 										}
 									}else{																// |
-										if($key == "dummy01" || $key == "dummy02"){
+										if($key == "dummy01" || $key == "dummy02"|| $key == "f_unterkunft"){
 											echo '<th class="grau" colspan="3">' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";	// |
 										}elseif($key == "f_id"){
 											echo '<th class="grau" colspan="3">' . '<a href="fahrt.php?sort='.$key.'">'. $value ."</a></th>";	// |
@@ -568,7 +576,7 @@
 						echo 		'<td	class= "gelb">'																				;
 						echo 			'<input type="text" name="kl_ku" size="1" value="' .$SpeicherDefaultWertePuffer['kl_ku']. '"/>' ; // Inputfield "kl_ku"
 						echo 		'</td>'																								; // & Defaultwert
-						echo 		'<td	class= "gelb" colspan="8">'																	;
+						echo 		'<td	class= "gelb" colspan="10">'																	;
 						
 						if(	(array_key_exists(		'modus',$_GET) 		&& $_GET['modus'] 		== 5)){
 								echo 			'<button type="submit" name="action" value="0">ADD</button>	'							; 	// Einfügen des ADD
@@ -590,9 +598,19 @@
 										$fahrtID = $row[ $value ]; 
 									}
 									
-									if (($value != 'dummy01') &&($value != 'dummy02') && ($row[ $value ] == '' )&&( $counter==5)){ // Leere Felder werden rosa markiert 
-										echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">&#x2795;</a></td>';
-										//echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">ADD</a></td>';
+									//if (($value != 'dummy01') &&($value != 'dummy02') && ($row[ $value ] == '' )&&( $counter==5)){ // Leere Felder werden rosa markiert 
+									if ($counter==5){ // Leere Felder werden rosa markiert 
+										//echo '<td class="rosa">' . '<a href="addUnterkunft.php?sort=&f_id='.$fahrtID.'">&#x2795;</a></td>';
+
+										if ($row[ $value] == ''){
+										 	echo '<td class="grau"></td>';   // Link
+	                                     	echo '<td class="grau">' . '<a href="unterkunft.php?modus=8&f_id='.$fahrtID .'">&#x2795;</a></td>';    // Link
+	    	                             	echo '<td class="grau"></td>';    // Link
+										}else{
+	    	                             	echo '<td class="grau">' . '<a href="unterkunft.php?modus=9&f_id='.$fahrtID .'">&#x2796;</a></td>';    // Link
+	                                     	echo '<td class="grau">' .  $row[ $value ] .'</td>';    // Link
+											echo '<td class="grau">' . '<a href="unterkunft.php?modus=4&f_id='.$fahrtID .'">&#x1f441;</a></td>';   // Link
+										}
 									}elseif( $value == "dummy01"){
 										echo '<td class="grau">' . '<a href="schueler.php?modus=4&f_id='.$fahrtID.'">&#x1f441;</a></td>';	// Link
 										echo '<td class="grau">' . '<a href="schueler.php?modus=8&f_id='.$fahrtID.'">&#x2795;</a></td>';	// Link

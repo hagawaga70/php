@@ -21,8 +21,8 @@
 			</div> 
 			<div class="naviBox"> 
   					<div class="naviInline">Unterkünfte:											</div> 
-  					<div class="naviInline"><a class="ankerNavi"  href="index.php">Zeige</a>		</div> 
-					<div class="naviInline"><a class="ankerNavi"  href="index.php">Suche</a>	    </div> 
+  					<div class="naviInline"><a class="ankerNavi"  href="unterkunft.php?modus=1">Zeige</a>		</div> 
+  					<div class="naviInline"><a class="ankerNavi"  href="unterkunft.php?modus=7">Edit</a>			</div> 
 			</div> 
 			<div class="naviBox"> 
   					<div class="naviInline">Orte:													</div> 
