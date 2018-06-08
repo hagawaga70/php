@@ -111,7 +111,7 @@
 						$row=pg_fetch_assoc($selectOrte);
 						
 						if(	!array_key_exists('o_id',$row)){
-n
+
 							print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
 							$errorSwitch = false;
 								
@@ -668,12 +668,12 @@ n
 										//	if ($row[ $value] == ''){
 										//	 	echo '<td class="grau"></td>';   // Link
 	                                         	echo '<td class="grau">' .  $row[ 'o_name' ] .'</td>';    // Link
-	                                         	echo '<td class="grau">' . '<a href="ort.php?modus=4&u_id='.$unterkunftID .'">&#x1f441;</a></td>';    // Link
+	                                         	echo '<td class="grau">' . '<a href="orte.php?modus=4&u_id='.$unterkunftID .'">&#x1f441;</a></td>';    // Link
 	    	                           //     	echo '<td class="grau"></td>';    // Link
 										//	}else{
-										//		echo '<td class="grau">' . '<a href="ort.php?modus=4&u_id='.$unterkunftID .'">&#x1f441;</a></td>';   // Link
+										//		echo '<td class="grau">' . '<a href="orte.php?modus=4&u_id='.$unterkunftID .'">&#x1f441;</a></td>';   // Link
 	                                   //      	echo '<td class="grau">' .  $row[ $value ] .'</td>';    // Link
-	    	                          //       	echo '<td class="grau">' . '<a href="ort.php?modus=9&u_id='.$unterkunftID .'">&#x2796;</a></td>';    // Link
+	    	                          //       	echo '<td class="grau">' . '<a href="orte.php?modus=9&u_id='.$unterkunftID .'">&#x2796;</a></td>';    // Link
 									//		}
 	
 										}else{
