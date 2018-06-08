@@ -91,6 +91,7 @@
 				while($row=pg_fetch_assoc($result)){							// |
 					$unterkunftSequenceNr = $row['nextval'];					// |
 				}
+
 				$errorSwitch=true;	
 
 				if (pg_query($db,"BEGIN TRANSACTION;")) { 		// Da in zwei Relationen Veränderungen durchgeführt werden müssen. 
@@ -100,7 +101,42 @@
 					print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
 					$errorSwitch = false;
 				}
-			
+
+
+				
+				if(array_key_exists('o_name_list',$_POST) && $_POST["o_name_list"] != '---' ){
+
+						$selectOrte = " SELECT o_id FROM ort WHERE o_name = ".$_POST['o_name_list'].";";	
+						
+						$row=pg_fetch_assoc($selectOrte);
+						
+						if(	!array_key_exists('o_id',$row)){
+n
+							print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+							$errorSwitch = false;
+								
+						}else{
+							$orteSequenceNr = $row['o_id'];
+						}
+				}else{
+						$result= pg_query($db,"SELECT nextval ('orteSeq')");   	// Eine neue ID für den Datensatz wird geliefert
+						while($row=pg_fetch_assoc($result)){							// |
+							$orteSequenceNr = $row['nextval'];					// |
+						}
+				
+						$insertOrte = "	INSERT INTO ort (o_id,o_name,entfng)
+										VALUES			(".$orteSequenceNr.",'".$_POST["o_name"]."',0)";
+											
+						if ($errorSwitch && pg_query($db,$insertOrte)) {
+						}else {
+
+								print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+								print_r($mapping );							//Eine Fehlermeldung wird im Browser angezeigt 
+								$errorSwitch = false;
+						}
+				}
+
+
 				$insertUnterkunft ="
 					INSERT INTO unterkunft (u_id, u_name, typ, errbar, kosten, entfkern, u_ort)
 					VALUES (".
@@ -110,7 +146,7 @@
 											$_POST["errbar"		]								."',"	.
 											$_POST["kosten"		]								.","	.
 											$_POST["entfkern"	]								.","	.
-											"1"												.");";	
+											$orteSequenceNr 									.");";	
 
 
 
@@ -122,7 +158,7 @@
 								$errorSwitch = false;
 						}
 						$anbietrUpdate =    "   UPDATE fahrt 
-                          	    	       		SET     u_id = ". $unterkunftSequenceNr ."
+                          	    	       		SET     f_unterkunft = ". $unterkunftSequenceNr ."
                             	         		WHERE   f_id   = " .$_POST['f_id']. ";"
                      	;
 
@@ -132,7 +168,7 @@
 								if (pg_query($db,"COMMIT;")) {
 								}else {
 
-										print_r(pg_last_error($db));					//Eine Fehlermeldung wird im Browser angezeigt 
+										print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
 										print_r($anbietrUpdate);					//Eine Fehlermeldung wird im Browser angezeigt 
 
 										if (pg_query($db,"ROllBACK;")) {
@@ -502,6 +538,16 @@
 									}elseif(array_key_exists('modus',$_GET) && $_GET['modus'] ==8) {		// Anfügen des Edit-Button
 
 										echo '<td class="rot"><button type="submit" name="action" value="8">SELECT</button></td>'	;
+										$formSelectOption = pg_query($db,
+																	"
+																	SELECT 		o_id,o_name	
+																	FROM 		ort  
+																	;
+															");								// SELECT-Anfrage für die Defaultwerte der Formularelemente (Editieren)
+
+										while($row=pg_fetch_assoc($formSelectOption)){
+											$o_name_list[$row['o_id']]= $row['o_name'];
+										}
 									}		
 								echo "</tr>";
 								// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -580,15 +626,14 @@
 
 											echo 		'<td	colspan="2" class= "gelb">
 
-																<input type="text" name="u_ort" size="'.$formInputSize[$value].'"';
-
-											echo				'<select name="f_id_operator">'											;
-											echo '					<option>---				</option>'									;
-											foreach ($operator as $key => $val) {	
+																<input type="text" name="o_name" size="'.$formInputSize[$value].'"/>'; 
+											echo				'<select name="o_name_list">'											;
+											echo '					<option>---</option>'									;
+											foreach ($o_name_list as $key => $val) {	
 												echo '				<option >'.$val.'</option>'									;
 											}
-											echo		'/>'; 
 
+											echo				'</select>'											;
 
 											echo 		'</td>'								;
 										}else{

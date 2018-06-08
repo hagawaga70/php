@@ -1,9 +1,11 @@
-											if ($row[ $value] == ''){
-											 	echo '<td class="grau"></td>';   // Link
-	                                         	echo '<td class="grau">' . '<a href="anbieter.php?modus=8&ak_id='.$aktivitaetID .'">&#x2795;</a></td>';    // Link
-	    	                                 	echo '<td class="grau"></td>';    // Link
-											}else{
-												echo '<td class="grau">' . '<a href="anbieter.php?modus=4&ak_id='.$aktivitaetID .'">&#x1f441;</a></td>';   // Link
-	                                         	echo '<td class="grau">' .  $row[ $value ] .'</td>';    // Link
-	    	                                 	echo '<td class="grau">' . '<a href="anbieter.php?modus=9&ak_id='.$aktivitaetID .'">&#x2796;</a></td>';    // Link
-											}
+				// 09 ---> Auswahlmenü Operatoren --------------------------------------------------------------
+				echo			'<select name="f_id_operator">'											;
+				echo '				<option>---				</option>'									;
+				foreach ($operator as $key => $val) {	
+					if (array_key_exists('f_id_operator',$_POST) && $_POST['f_id_operator']== $val){
+						echo '				<option selected >'.$val.'</option>'						;  	// Nach der Suche werden die Suchparameter
+					}else{																					// automatisch voreingestellt
+						echo '				<option >'.$val.'</option>'									;
+					}
+				}
+				echo '			</select>'																;	
