@@ -394,6 +394,15 @@
 										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
 
 
+				}elseif (array_key_exists('modus',$_GET) && $_GET['modus'] == 14){		//	Das Skript unterkunft.php wurde vom Skript fahrt.php 
+						$on = 'ON (u.u_ort= o.o_id) WHERE u.u_id  IN (
+										SELECT 		u_id 
+										FROM 		unterkunft
+										WHERE		u_ort ='. $_GET["u_ort"].'
+										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
+
+
+
 
 				}elseif ( (array_key_exists('modus',$_GET) && $_GET['modus'] == 9) ){		//	Das Skript unterkunft.php wurde vom Skript fahrt.php 
 						//  aufgerufen. unterkunft.php zeigt jetzt nur die Unterkunft an
@@ -459,7 +468,6 @@
 										" . $on . "
 										;"; 
 						$result = pg_query($db,$query);
-						print_r($query);
 
 				}
 
