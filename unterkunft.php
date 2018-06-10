@@ -21,16 +21,16 @@
 			// GET  modus  3 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  (NICHT IMPLEMENTIERT)
 			// POST action 5 	Öffnet das Suchfenster und zeigt  alle selektierten Datensätze  (NICHT IMPLEMENTIERT)
 			// --------------------------------------------------------------------------------------------------------------------------------------
-			// GET  modus  4   	unterkunft.php wird von fahrt.php aufgerufen und zeigt alle Unterkunft, die an einer bestimmten Fahrt teilnehmen 	
+			// GET  modus  4   	unterkunft.php wird von fahrt.php aufgerufen und zeigt alle Unterkünfte an, einer bestimmten Fahrt an	
 			// --------------------------------------------------------------------------------------------------------------------------------------
 			//  MAP 
-			// .GET  modus  8   	unterkunft.php wird fahrt.php aufgerufen. 
-			// #POST action 8	A)	Ein bestehender Unterkunftdatensatz (u_id) wird mit der f_id in der Relation "fahrt" eingetragen
-			// #POST action 9	B)  Ein neuer Unterkunftdatensatz wird angelegt. Die u_id und die f_id werden in der Relation "wirdangeboten" abgespeichert
+			// GET  modus  8   	unterkunft.php wird von fahrt.php aufgerufen. 
+			// POST action 8	A)	Ein bestehender Unterkunftdatensatz  wird mit der u_id in der Relation "fahrt" eingetragen
+			// POST action 9	B)  Ein neuer Unterkunftdatensatz wird angelegt. Die u_id wird in der Relation "fahrt" eingetragen
 			// --------------------------------------------------------------------------------------------------------------------------------------
 			//  DELETE
-			// .GET  modus  9   	unterkunft.php wird von fahrt.php aufgerufen. 
-			// #POST action 1   	Entfernen eines Datensatzes
+			// GET  modus  9   	unterkunft.php wird von fahrt.php aufgerufen. 
+			// POST action 1   	Entfernen eines Datensatzes
 			// --------------------------------------------------------------------------------------------------------------------------------------
 			// POST action  2 	Der zu editierende Datensatz wird kein zweites Mal angezeigt
 			// --------------------------------------------------------------------------------------------------------------------------------------
@@ -627,21 +627,41 @@
 										"entfkern"	=>	"4"					,
 										"u_ort"	   	=>	"10"				,
 									];
-												
+										
+
+										$getOrtName = pg_query($db,
+																	"
+																	SELECT 	 	o.o_name
+																	FROM 		unterkunft u, ort o 
+																	WHERE		u.u_ort=o.o_id
+																	AND			u.u_id=" . $_POST['editieren']. "
+																	;
+															");								// SELECT-Anfrage für die Defaultwerte der Formularelemente (Editieren)
+
+										$row=pg_fetch_assoc($getOrtName);
+
+
+
+
+		
 									foreach($attributeUnterkunft as $key => $value) {
 										if($value == "u_id"){
 										}elseif($value == "u_ort"){
 
-											echo 		'<td	colspan="2" class= "gelb">
+											echo '<td	colspan="2" class= "gelb">';
+											
+											if(	(array_key_exists('modus',$_GET) 		&& $_GET['modus'] 		== 8)){ 	
+													echo		'		<input type="text" name="o_name" size="'.$formInputSize[$value].'"/>'; 
+													echo				'<select name="o_name_list">'											;
+													echo '					<option>---</option>'									;
+													foreach ($o_name_list as $key => $val) {	
+														echo '				<option >'.$val.'</option>'									;
+													}
 
-																<input type="text" name="o_name" size="'.$formInputSize[$value].'"/>'; 
-											echo				'<select name="o_name_list">'											;
-											echo '					<option>---</option>'									;
-											foreach ($o_name_list as $key => $val) {	
-												echo '				<option >'.$val.'</option>'									;
+													echo				'</select>'											;
+											}else{
+												echo $row['o_name'];
 											}
-
-											echo				'</select>'											;
 
 											echo 		'</td>'								;
 										}else{

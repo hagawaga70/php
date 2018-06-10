@@ -1,11 +1,91 @@
-				// 09 ---> Auswahlmenü Operatoren --------------------------------------------------------------
-				echo			'<select name="f_id_operator">'											;
-				echo '				<option>---				</option>'									;
-				foreach ($operator as $key => $val) {	
-					if (array_key_exists('f_id_operator',$_POST) && $_POST['f_id_operator']== $val){
-						echo '				<option selected >'.$val.'</option>'						;  	// Nach der Suche werden die Suchparameter
-					}else{																					// automatisch voreingestellt
-						echo '				<option >'.$val.'</option>'									;
-					}
+				$errorSwitch=true;	
+
+				if (pg_query($db,"BEGIN TRANSACTION;")) { 		// Da in zwei Relationen Veränderungen durchgeführt werden müssen. 
+				}else {											// kann im Fehlerfall eines Teil-SQL-Statements durch Transaction/Rollback
+																		// eine unvollständige Veränderung der Daten rückgängig gemacht werden
+
+					print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+					$errorSwitch = false;
 				}
-				echo '			</select>'																;	
+
+
+				
+				if(array_key_exists('o_name_list',$_POST) && $_POST["o_name_list"] != '---' ){
+
+						$selectOrte = " SELECT o_id FROM ort WHERE o_name = ".$_POST['o_name_list'].";";	
+						
+						$row=pg_fetch_assoc($selectOrte);
+						
+						if(	!array_key_exists('o_id',$row)){
+
+							print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+							$errorSwitch = false;
+								
+						}else{
+							$orteSequenceNr = $row['o_id'];
+						}
+				}else{
+						$result= pg_query($db,"SELECT nextval ('orteSeq')");   	// Eine neue ID für den Datensatz wird geliefert
+						while($row=pg_fetch_assoc($result)){							// |
+							$orteSequenceNr = $row['nextval'];					// |
+						}
+				
+						$insertOrte = "	INSERT INTO ort (o_id,o_name,entfng)
+										VALUES			(".$orteSequenceNr.",'".$_POST["o_name"]."',0)";
+											
+						if ($errorSwitch && pg_query($db,$insertOrte)) {
+						}else {
+
+								print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+								print_r($mapping );							//Eine Fehlermeldung wird im Browser angezeigt 
+								$errorSwitch = false;
+						}
+				}
+
+
+				$insertUnterkunft ="
+					INSERT INTO unterkunft (u_id, u_name, typ, errbar, kosten, entfkern, u_ort)
+					VALUES (".
+											$unterkunftSequenceNr 								.",'"	.
+											$_POST["u_name"		]								."','"	.
+											$_POST["typ"		]								."','"	.
+											$_POST["errbar"		]								."',"	.
+											$_POST["kosten"		]								.","	.
+											$_POST["entfkern"	]								.","	.
+											$orteSequenceNr 									.");";	
+
+
+
+						if ($errorSwitch && pg_query($db,$insertUnterkunft)) {
+						}else {
+
+								print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+								print_r($mapping );							//Eine Fehlermeldung wird im Browser angezeigt 
+								$errorSwitch = false;
+						}
+						$anbietrUpdate =    "   UPDATE fahrt 
+                          	    	       		SET     f_unterkunft = ". $unterkunftSequenceNr ."
+                            	         		WHERE   f_id   = " .$_POST['f_id']. ";"
+                     	;
+
+
+						if ($errorSwitch && pg_query($db,$anbietrUpdate)) {
+
+								if (pg_query($db,"COMMIT;")) {
+								}else {
+
+										print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+										print_r($anbietrUpdate);					//Eine Fehlermeldung wird im Browser angezeigt 
+
+										if (pg_query($db,"ROllBACK;")) {
+										}else {
+
+												print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+										}
+								}
+						}else{
+								if (pg_query($db,"ROllBACK;")) {
+								}else {
+										print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+								}
+						}

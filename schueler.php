@@ -89,29 +89,64 @@
 					$schuelerSequenceNr = $row['nextval'];					// |
 				}
 
-				$mapping =
-
-						"WITH data (f_id, s_id,vname,nname,gebdat,m_w) 
-						AS (
-								VALUES (".$_POST["f_id"].",".$schuelerSequenceNr .",'".$_POST["vname"]."','".$_POST["nname"]."','".$_POST["gebdat"]."',".$_POST["m_w"].")
-						), 
-						ins1 AS (
-							INSERT INTO schueler (s_id,vname,nname,gebdat,m_w)
-							SELECT s_id,vname,nname,gebdat,m_w FROM data
-							ON CONFLICT DO NOTHING
-							Returning s_id
-						)
-							INSERT INTO nimmtteil (s_id,f_id)
-							SELECT 	s_id, f_id
-							FROM 	data
-							JOIN ins1 USING (s_id);";
-
-				if (pg_query($db,$mapping)) {
-				}else {
 				
+				
+				$errorSwitch=true;	
+
+				if (pg_query($db,"BEGIN TRANSACTION;")) { 		// Da in zwei Relationen Veränderungen durchgeführt werden müssen. 
+				}else {											// kann im Fehlerfall eines Teil-SQL-Statements durch Transaction/Rollback
+																		// eine unvollständige Veränderung der Daten rückgängig gemacht werden
+
 					print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
-					print_r($mapping);				//Eine Fehlermeldung wird im Browser angezeigt 
+					$errorSwitch = false;
 				}
+
+
+				
+				
+				$insertSchueler="
+					INSERT INTO schueler(s_id,vname,nname,gebdat,m_w)
+					VALUES (".
+											$schuelerSequenceNr									.",'"	.
+											$_POST["vname"		]								."','"	.
+											$_POST["nname"		]								."','"	.
+											$_POST["gebdat"		]								."','"	.
+											$_POST["m_w"		]								."');";	
+
+
+
+						if ($errorSwitch && pg_query($db,$insertSchueler)) {
+						}else {
+
+								print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+								print_r($insertSchueler);							//Eine Fehlermeldung wird im Browser angezeigt 
+								$errorSwitch = false;
+						}
+						$insertNimmtteil =    "   	INSERT INTO nimmtteil (s_id,f_id)
+													VALUES (".$schuelerSequenceNr .",".$_POST['f_id'].".);"
+                     						;
+
+
+						if ($errorSwitch && pg_query($db,$insertNimmtteil)) {
+
+								if (pg_query($db,"COMMIT;")) {
+								}else {
+
+										print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+										print_r($insertNimmtteil);					//Eine Fehlermeldung wird im Browser angezeigt 
+
+										if (pg_query($db,"ROllBACK;")) {
+										}else {
+
+												print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+										}
+								}
+						}else{
+								if (pg_query($db,"ROllBACK;")) {
+								}else {
+										print_r(pg_last_error($db));				//Eine Fehlermeldung wird im Browser angezeigt 
+								}
+						}
 			}			
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

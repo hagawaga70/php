@@ -195,7 +195,6 @@
 											FROM 		wirdangeboten 
 											WHERE		ak_id ='. $_GET["ak_id"].'
 										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
-				print_r($where);
 				echo '<input id="ak_id" name="ak_id" type="hidden" value="'.$_GET["ak_id"].'">';	// Die ak_id wird versteckt per GET weitergegeben
 				
 			}elseif ($_GET['modus'] == 5){					// Hinzufügen eines Datensatzes			
@@ -232,7 +231,6 @@
 											FROM 		fahrt f, unterkunft u	
 											WHERE		f.f_unterkunft ='. $_GET["u_id"].'
 										)';															// Erstellen des WHERE-CLAUSE zur SELECT-ABFRAGE
-			print_r($where);			
 			}
 
 
@@ -334,7 +332,6 @@
 												".$where."
 												;
 								");
-			print_r($result);
 			}
 			// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

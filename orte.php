@@ -332,7 +332,7 @@
 							while($row=pg_fetch_assoc($result)){					// Anzeigen der Datensätze
 								echo "<tr>";
 									foreach ($attributeAktivitaet as $value)	{
-										if($value == 'o_id') {						// Zum Aufrufen anderer Skripte wird id benötigt
+										if($value == 'o_id') {						// Zum Aufrufen anderer Skripte wird die ID benötigt
 											$orteID = $row[ $value ]; 
 										}
 										
@@ -351,10 +351,7 @@
 							
 										
 									}
-									if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 9) {	// Einfügen von Radiobutton zum Selektieren 
-																									// von zu löschenden  tuple
-											echo '<td class="rot"><input type="radio" id="'. $orteID .'" name="loeschen" value="'. $orteID .'">'	;
-									}elseif(	array_key_exists('modus',$_GET) && $_GET['modus'] == 7 ||
+									if(	array_key_exists('modus',$_GET) && $_GET['modus'] == 7 ||
 												array_key_exists('modus',$_GET) && $_GET['modus'] == 4 ) { 	// Einfügen von Radiobutton zum Selektieren 
 																											// von zu editierenden Tuple
 											echo '<td class="rot"><input type="radio" id="'. $orteID .'" name="editieren" value="'. $orteID .'">'	;
