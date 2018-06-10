@@ -1,0 +1,63 @@
+(ii) Beschreibung der interaktiven Basismöglichkeiten
+		Menü: 	Im oberen Teil der Webseite befindet sich das Menü, von dem aus interaktiv auf die einzelnen 
+				Relationen zugegriffen werden kann.Das Menü hat folgende Reiter.
+
+					Anbieter/Zeige:			Unter dem Menürahmen befindet sich ein Rahmen in dem die Inhalte der einzelnen Relationen
+											ausgegeben werden.Die Ausgabe ist folgende:
+											Attribute: 	Alle Attribute der Relation "Anbieter" werden als Spaltenüberschrift lesbar angezeigt.
+														Hinter jeder Spaltenüberschrift verbirgt sich ein Link mit dem alle Werte der Relation
+														Anbieter sortiert nach dem jeweiligen angeklickten Attribut sortiert werden.  
+														Außer der AnbieterID werden hier alle Attributewerte der Relation Anbieter angezeigt. 
+														Die Spalte der AnbieterID wird als Spalte Aktivität/en bezeichnet. Hier wird für jedes
+														Tuple ein Link in der Form eines Auges angezeigt. Beim Anklicken eines Auges werden alle
+														Datensätze der Relation Aktivitaeten zur jeweilen AnbieterID angezeigt. 
+											Tuple:		Alle Tupel werden ausgegeben.	
+
+					Anbieter/Bearbeiten:	Beim Anklicken des  Links "Bearbeiten" erhält man die gleiche Ausgabe wie unter "Zeige" s.o. Zusätzlich
+											erscheint rechts neben der letzten Spaltenüberschrift der Button "EDIT" und rechts hinter dem letzten 
+											Attributwert eines Tuples ein Radio-Element zur Auswahl des Tuples. Wurde ein Tuple ausgewählt und der
+											"EDIT"-Button gedrückt, kann nun das Tuple bearbeitet werden. Bis auf die AnbieterID können nun alle
+											Attributwerte des ausgewählten Tuples verändert werden. Mit dem Drücken des  "Update"-Button ganz rechts
+											neben den geänderten Attributewerten werden die Änderungen in der Relation Anbieter abgespeichert.Es 
+											erscheint wieder die Ausgabe wie unter "Zeige".
+
+					HINWEIS Löschen:		Ein Anbieter wird implizit gelöscht, wenn in der Relation "Aktivitaet" die letzte Aktivität eines Anbieterw 
+											gelöscht wird. Löschen eines Datensatzes der Relation "Aktivität" siehe Reiter "Fahrten". 
+					---------------------------------------------------------------------------------------------------------------------------------------------
+					Aktivitaet/Zeige:		Unter dem Menürahmen befindet sich ein Rahmen in dem die Inhalte der einzelnen Relationen
+											ausgegeben werden.Die Ausgabe ist folgende:
+											Attribute: 	Alle Attribute der Relation "Aktivitaet" werden als Spaltenüberschrift lesbar angezeigt.
+														Hinter jeder Spaltenüberschrift verbirgt sich ein Link mit dem alle Werte der Relation
+														Aktivitaet sortiert nach dem jeweiligen angeklickten Attribut sortiert werden.  
+														Außer der AktivitaetID werden hier alle Attributewerte der Relation Aktivitaet angezeigt. 
+														Die Spalte der AktivitaetID wird als Spalte Fahrt/en bezeichnet. Hier wird für jedes
+														Tuple ein Link in der Form eines Auges angezeigt. Beim Anklicken eines Auges werden alle
+														Datensätze der Relation Aktivitaeten zur jeweilen AktivitaetID angezeigt. 
+													    BESONDERHEIT: In der Spalte Anbieter werden die einzelnen AnbieterID's aufgelöst, so dass
+														der Name des Anbieters angezeigt wird. Rechts und links neben dem Anbietername erscheinen
+														zwei anklickbare Links im Form eines AUGEs und eines MINUSZEICHENs. Wird das AUGE ange-
+														klick, so wird der Anbieter zu einer Aktivitaet angezeigt. Dieser kann nun bearbeitet
+														werden (siehe Anbieter/Bearbeiten).Wird das MINUSZEICHEN angeklickt, wird der Link zwischen
+														der gewählten Aktivität und einem Anbieter gelöscht. Sollte der Anbieter nicht mit weiteren
+														Aktivitaeten verknüpft sein, so wird auch der Anbieter indirekt gelöscht.Sollte mit einer
+														Aktivitaet noch kein Anbieter verknüpft sein, so erscheint ein Link in Form eines PLUSZEICHENS.
+														Wird dieser Link angeklickt, so kann entweder ein bestehender Anbieter mit der Aktivitaet via
+														Radio- und Select-Button verknüpft werden, oder einer neuer Anbieter via Eingabefelder und einem
+														ADD-Button angelegt werden. Dieser neue Anbieter ist dann mit der ausgewählten Aktivitaet verknüpft.
+											Tuple:		Alle Tupel werden ausgegeben.	
+
+					Aktivitaet/Bearbeiten:	Beim Anklicken des Links "Bearbeiten" erhält man die gleiche Ausgabe wie unter "Zeige" s.o. Zusätzlich
+											erscheint rechts neben der letzten Spaltenüberschrift der Button "EDIT" und rechts hinter dem letzten 
+											Attributwert eines Tuples ein Radio-Element zur Auswahl des Tuples. Wurde ein Tuple ausgewählt und der
+											"EDIT"-Button gedrückt, kann nun das Tuple bearbeitet werden. Bis auf die AktivitaetID können nun alle
+											Attributwerte des ausgewählten Tuples verändert werden. Mit dem Drücken des  "Update"-Button ganz rechts
+											neben den geänderten Attributewerten werden die Änderungen in der Relation Aktivitaet abgespeichert.Es 
+											erscheint wieder die Ausgabe wie unter "Zeige".
+
+					HINWEIS Löschen:		Eine Aktivitaet wird implizit gelöscht, wenn in der Relation die letzte Aktivität eines Aktivitaet gelöscht 
+											wird.
+i					---------------------------------------------------------------------------------------------------------------------------------------------
+						
+							
+				
+DIT(iii) Beschreibung optionaler Möglichkeiten
